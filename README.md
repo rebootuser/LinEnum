@@ -5,7 +5,7 @@ High-level summary of the checks/tasks performed by LinEnum:
 
 * Kernel and distribution release details
 * System Information:
--** Hostname
+- ** Hostname
 -** Networking details:
 -** Current IP
 -** Default route details
