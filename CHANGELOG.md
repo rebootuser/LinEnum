@@ -9,6 +9,7 @@ Additions
 * Lists available shells
 * Performs basics SSH checks (i.e. what can be read/where is it stored and associated permissions)
 * Locates and lists password hashes that may be found in /etc/passwd on old setups (big thanks to www.pentestmonkey.net)
+* Locates credentials file and username/passwords in /etc/fstab
 
 Modifications:
 * ifconfig command simplified so 'br' & 'em' interfaces details are also shown
