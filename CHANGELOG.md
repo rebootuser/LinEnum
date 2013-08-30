@@ -1,7 +1,5 @@
 # Changelog
 
-## V0.1 (release 19-08-2013)
-
 ## V0.2 (release 30-08/2013)
 Additions
 * Date/time is displayed when the scan is started
@@ -15,3 +13,5 @@ Additions
 Modifications:
 * ifconfig command simplified so 'br' & 'em' interfaces details are also shown
 * Keyword search also includes *.ini files
+
+## V0.1 (release 19-08-2013)
