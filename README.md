@@ -1,6 +1,8 @@
 # LinEnum
 For more information visit www.rebootuser.com
 
+See CHANGELOG.md for further details
+
 High-level summary of the checks/tasks performed by LinEnum:
 
 * Kernel and distribution release details
@@ -15,9 +17,11 @@ High-level summary of the checks/tasks performed by LinEnum:
  * Last logged on users
  * List all users including uid/gid information
  * List root accounts
+ * Checks if password hashes are stored in /etc/passwd
  * Extract full details for ‘default’ uid’s such as 0, 1000, 1001 etc
  * Attempt to read restricted files i.e. /etc/shadow
  * List current users history files (i.e .bash_history, .nano_history etc.)
+ * Basic SSH checks
 * Privileged access:
  * Determine if /etc/sudoers is accessible
  * Determine if the current user has Sudo access without a password
@@ -41,9 +45,10 @@ High-level summary of the checks/tasks performed by LinEnum:
  * MYSQL
  * Postgres
  * Apache
+  * Checks user config
 * Default/Weak Credentials:
  * Checks for default/weak Postgres accounts
- * Checks for default root/root access to local MYSQL services
+ * Checks for default/weak MYSQL accounts
 * Searches:
  * Locate all SUID/GUID files
  * Locate all world-writable SUID/GUID files

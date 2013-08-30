@@ -1,18 +1,23 @@
 #!/bin/bash
 #A simple script to enumerate local information from a Linux host
-#version 0.1
+#version 0.2
 #@oshearing
 
 echo -e "\n\e[00;30m#########################################################\e[00m"
 echo -e "\e[00;34mLocal Linux Enumeration & Privilege Escalation Script\e[00m"
 echo -e "\e[00;30m#########################################################\e[00m"
 echo -e "\e[00;30m# www.rebootuser.com\e[00m"
-echo -e "\e[00;30m# version 0.1\e[00m\n"
+echo -e "\e[00;30m# version 0.2\e[00m\n"
 
-#enter a single keyword that'll be used to search within *.conf and *.log files.
-echo "Enter a keyword that'll be used to search in .conf & .log files (i.e. password)"
+#enter a single keyword that'll be used to search within *.conf, *.log & *.ini files.
+echo "Enter a keyword that'll be used to search in *.conf, *.log and *.ini files (i.e. password)"
 read keyword
+
+who=`whoami`
+
 echo -e "\n"
+echo -e "\e[00;30mScan started at:"; date
+echo -e "\e[00m\n"
 
 echo -e "\e[00;34m### SYSTEM ##############################################\e[00m"
 
@@ -26,7 +31,7 @@ fi
 
 procver=`cat /proc/version 2>/dev/null`
 if [ "$procver" ]; then
-  echo -e "\e[00;31mKernel information continued:\e[00m\n$procver"
+  echo -e "\e[00;31mKernel information (continued):\e[00m\n$procver"
   echo -e "\n"
 else 
   :
@@ -59,6 +64,14 @@ else
   :
 fi
 
+grpinfo=`getent group $who 2>/dev/null`
+if [ "$grpinfo" ]; then
+  echo -e "\e[00;31mAll members of 'our' group(s):\e[00m\n$grpinfo"
+  echo -e "\n"
+else 
+  :
+fi
+
 lastlogedonusrs=`lastlog |grep -v "Never" 2>/dev/null`
 if [ "$lastlogedonusrs" ]; then
   echo -e "\e[00;31mUsers that have previously logged onto the system:\e[00m\n$lastlogedonusrs"
@@ -69,12 +82,20 @@ fi
 
 usrsinfo=`cat /etc/passwd | cut -d ":" -f 1,2,3,4 2>/dev/null`
 if [ "$usrsinfo" ]; then
-  echo -e "\e[00;31mAll users and uid/gid info - is the password stored here or /etc/shadow (represented by 'x'):\e[00m\n$usrsinfo"
+  echo -e "\e[00;31mAll users and uid/gid info:\e[00m\n$usrsinfo"
   echo -e "\n"
 else 
   :
 fi
 
+hashesinpasswd=`grep -v '^[^:]*:[x]' /etc/passwd 2>/dev/null`
+if [ "$hashesinpasswd" ]; then
+  echo -e "\e[00;33mIt looks like we have password hashes in /etc/passwd!\e[00m\n$hashesinpasswd"
+  echo -e "\n"
+else 
+  :
+fi
+ 
 #locate custom user accounts with some 'known default' uids
 readpasswd=`grep -v "^#" /etc/passwd | awk -F: '$3 == 0 || $3 == 500 || $3 == 501 || $3 == 502 || $3 == 1000 || $3 == 1001 || $3 == 1002 || $3 == 2000 || $3 == 2001 || $3 == 2002 { print }'`
 if [ "$readpasswd" ]; then
@@ -116,7 +137,7 @@ fi
 #can we sudo without supplying a password
 sudoperms=`echo '' | sudo -S -l 2>/dev/null`
 if [ "$sudoperms" ]; then
-  echo -e "\e[00;31mWe can sudo without supplying a password!\e[00m\n$sudoperms"
+  echo -e "\e[00;33mWe can sudo without supplying a password!\e[00m\n$sudoperms"
   echo -e "\n"
 else 
   :
@@ -147,11 +168,51 @@ else
   :
 fi
 
+wrfileshm=`find /home/ -perm -4 -type f -exec ls -al {} \; 2>/dev/null`
+if [ "$wrfileshm" ]; then
+  echo -e "\e[00;31mWorld-readable files within /home:\e[00m\n$wrfileshm"
+  echo -e "\n"
+else 
+  :
+fi
+
+homedircontents=`ls -ahl ~ 2>/dev/null`
+if [ "$homedircontents" ]; then
+  echo -e "\e[00;31mHome directory contents:\e[00m\n$homedircontents"
+  echo -e "\n"
+else 
+  :
+fi
+
+sshfiles=`find / -name "id_dsa*" -o -name "id_rsa*" -o -name "known_hosts" -o -name "authorized_hosts" -o -name "authorized_keys" 2>/dev/null |xargs -r ls -la`
+if [ "$sshfiles" ]; then
+  echo -e "\e[00;31mSSH keys/host information found in the following locations:\e[00m\n$sshfiles"
+  echo -e "\n"
+else 
+  :
+fi
+
+sshrootlogin=`grep "PermitRootLogin " /etc/ssh/sshd_config 2>/dev/null | grep -v "#" | awk '{print  $2}'`
+if [ "$sshrootlogin" = "yes" ]; then
+  echo -e "\e[00;31mRoot is allowed to login via SSH:\e[00m"; grep "PermitRootLogin " /etc/ssh/sshd_config 2>/dev/null | grep -v "#"
+  echo -e "\n"
+else 
+  :
+fi
+
 echo -e "\e[00;34m### ENVIRONMENTAL #######################################\e[00m"
 
 pathinfo=`echo $PATH 2>/dev/null`
 if [ "$pathinfo" ]; then
   echo -e "\e[00;31mPath information:\e[00m\n$pathinfo"
+  echo -e "\n"
+else 
+  :
+fi
+
+shellinfo=`cat /etc/shells 2>/dev/null`
+if [ "$shellinfo" ]; then
+  echo -e "\e[00;31mAvailable shells:\e[00m\n$shellinfo"
   echo -e "\n"
 else 
   :
@@ -218,9 +279,9 @@ fi
 
 echo -e "\e[00;34m### NETWORKING  ##########################################\e[00m"
 
-nicinfo=`/sbin/ifconfig -a 2>/dev/null | grep -A 1 "eth"`
+nicinfo=`/sbin/ifconfig -a 2>/dev/null`
 if [ "$nicinfo" ]; then
-  echo -e "\e[00;31mNetwork & ip info:\e[00m\n$nicinfo"
+  echo -e "\e[00;31mNetwork & IP info:\e[00m\n$nicinfo"
   echo -e "\n"
 else 
   :
@@ -244,7 +305,7 @@ fi
 
 tcpservs=`netstat -antp 2>/dev/null`
 if [ "$tcpservs" ]; then
-  echo -e "\e[00;31mListening tcp:\e[00m\n$tcpservs"
+  echo -e "\e[00;31mListening TCP:\e[00m\n$tcpservs"
   echo -e "\n"
 else 
   :
@@ -252,7 +313,7 @@ fi
 
 udpservs=`netstat -anup 2>/dev/null`
 if [ "$udpservs" ]; then
-  echo -e "\e[00;31mListening udp:\e[00m\n$udpservs"
+  echo -e "\e[00;31mListening UDP:\e[00m\n$udpservs"
   echo -e "\n"
 else 
   :
@@ -370,6 +431,14 @@ else
   :
 fi
 
+mysqlconnectnopass=`mysqladmin -uroot version 2>/dev/null`
+if [ "$mysqlconnectnopass" ]; then
+  echo -e "\e[00;33m***We can connect to the local MYSQL service as 'root' and without a password!\e[00m\n$mysqlconnectnopass"
+  echo -e "\n"
+else 
+  :
+fi
+
 postgver=`psql -V 2>/dev/null`
 if [ "$postgver" ]; then
   echo -e "\e[00;31mPostgres version:\e[00m\n$postgver"
@@ -413,6 +482,14 @@ fi
 apachever=`apache2 -v 2>/dev/null; httpd -v 2>/dev/null`
 if [ "$apachever" ]; then
   echo -e "\e[00;31mApache version:\e[00m\n$apachever"
+  echo -e "\n"
+else 
+  :
+fi
+
+apacheusr=`cat /etc/apache2/envvars 2>/dev/null |grep -i 'user\|group' |awk '{sub(/.*\export /,"")}1'`
+if [ "$apacheusr" ]; then
+  echo -e "\e[00;31mApache user configuration:\e[00m\n$apacheusr"
   echo -e "\n"
 else 
   :
@@ -507,9 +584,25 @@ else
   :
 fi
 
+bsdusrplan=`find /usr/home -iname *.plan -exec ls -la {} \; -exec cat {} 2>/dev/null \;`
+if [ "$bsdusrplan" ]; then
+  echo -e "\e[00;31mPlan file permissions and contents:\e[00m\n$bsdusrplan"
+  echo -e "\n"
+else 
+  :
+fi
+
 rhostsusr=`find /home -iname *.rhosts -exec ls -la {} 2>/dev/null \; -exec cat {} 2>/dev/null \;`
 if [ "$rhostsusr" ]; then
-  echo -e "\e[00;31mrhost config file(s) and contents:\e[00m\n$rhostsusr"
+  echo -e "\e[00;31mrhost config file(s) and file contents:\e[00m\n$rhostsusr"
+  echo -e "\n"
+else 
+  :
+fi
+
+bsdrhostsusr=`find /usr/home -iname *.rhosts -exec ls -la {} 2>/dev/null \; -exec cat {} 2>/dev/null \;`
+if [ "$bsdrhostsusr" ]; then
+  echo -e "\e[00;31mrhost config file(s) and file contents:\e[00m\n$bsdrhostsusr"
   echo -e "\n"
 else 
   :
@@ -517,7 +610,7 @@ fi
 
 rhostssys=`find /etc -iname hosts.equiv -exec ls -la {} 2>/dev/null \; -exec cat {} 2>/dev/null \;`
 if [ "$rhostssys" ]; then
-  echo -e "\e[00;31mHosts.equiv binary details & contents: \e[00m\n$rhostssys"
+  echo -e "\e[00;31mHosts.equiv file details and file contents: \e[00m\n$rhostssys"
   echo -e "\n"
   else 
   :
@@ -529,6 +622,22 @@ if [ "$nfsexports" ]; then
   echo -e "\n"
   else 
   :
+fi
+
+fstab=`cat /etc/fstab 2>/dev/null |grep username |awk '{sub(/.*\username=/,"");sub(/\,.*/,"")}1'| xargs -r echo username:; cat /etc/fstab 2>/dev/null |grep password |awk '{sub(/.*\password=/,"");sub(/\,.*/,"")}1'| xargs -r echo password:; cat /etc/fstab 2>/dev/null |grep domain |awk '{sub(/.*\domain=/,"");sub(/\,.*/,"")}1'| xargs -r echo domain:`
+if [ "$fstab" ]; then
+  echo -e "\e[00;33m***Looks like there are credentials in /etc/fstab!\e[00m\n$fstab"
+  echo -e "\n"
+  else 
+  :
+fi
+
+fstabcred=`cat /etc/fstab 2>/dev/null |grep cred |awk '{sub(/.*\credentials=/,"");sub(/\,.*/,"")}1'| xargs -I{} sh -c 'ls -la {}; cat {}'`
+if [ "$fstabcred" ]; then
+    echo -e "\e[00;33m***/etc/fstab contains a credentials file!\e[00m\n$fstabcred"
+    echo -e "\n"
+    else
+    :
 fi
 
 #use supplied keyword and cat *.conf files for potentional matches - output will show line number within relevant file path where a match has been located
@@ -557,6 +666,21 @@ if [ "$keyword" = "" ];then
      else 
 	echo -e "\e[00;31mFind keyword ($keyword) in .log files (recursive 2 levels):\e[00m"
 	echo -e "'$keyword' not found in any .log files"
+	echo -e "\n"
+    fi
+fi
+
+#use supplied keyword and cat *.ini files for potentional matches - output will show line number within relevant file path where a match has been located
+if [ "$keyword" = "" ];then
+  echo -e "Can't search *.ini files as no keyword was entered\n"
+  else
+    logkey=`find / -maxdepth 4 -name *.ini -type f -exec grep -Hn $keyword {} \; 2>/dev/null`
+    if [ "$logkey" ]; then
+      echo -e "\e[00;31mFind keyword ($keyword) in .ini files (recursive 4 levels - output format filepath:identified line number where keyword appears):\e[00m\n$logkey"
+      echo -e "\n"
+     else 
+	echo -e "\e[00;31mFind keyword ($keyword) in .ini files (recursive 2 levels):\e[00m"
+	echo -e "'$keyword' not found in any .ini files"
 	echo -e "\n"
     fi
 fi
