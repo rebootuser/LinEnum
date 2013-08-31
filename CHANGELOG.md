@@ -1,6 +1,13 @@
 # Changelog
 
-## V0.2 (release 30-08/2013)
+## V0.3 (release 30-08-2013)
+Edited by Nikhil Sreekumar (@roo7break)
+Enhancements
+* Support for multiple keywords for searching added (space separated)
+* Search for keywords optimised
+* Store output to file and pass seach keywords from command line (e.g. ./LinEnum.sh output.txt "password credential username"
+
+## V0.2 (release 30-08-2013)
 Additions
 * Date/time is displayed when the scan is started
 * Checks for word-readable files in /home and displays positive matches
