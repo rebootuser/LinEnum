@@ -7,7 +7,7 @@ usage ./LinEnum.sh outfile.txt 'keyword1 keyword2'
 Thanks to @roo7break for the above reporting functionality
 
 # Notes:
-LinEnum_sh.sh should be used for /bin/sh shell as search capability within 0.4 version is not working as expected (/bin/bash compatibility only)
+LinEnum_sh.sh should be used for /bin/sh shell as search capability within 0.4 version is not working as expected (/bin/bash compatibility only).
 
 See CHANGELOG.md for further details
 
