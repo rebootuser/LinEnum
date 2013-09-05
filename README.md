@@ -1,6 +1,11 @@
 # LinEnum
 For more information visit www.rebootuser.com
 
+For silent (and clean output) Outfile and keyword(s) can be supplied from the command line:
+usage ./LinEnum.sh outfile.txt 'keyword1 keyword2'
+
+Thanks to @roo7break for the above reporting functionality
+
 See CHANGELOG.md for further details
 
 High-level summary of the checks/tasks performed by LinEnum:
