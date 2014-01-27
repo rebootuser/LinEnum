@@ -1,13 +1,28 @@
 # LinEnum
 For more information visit www.rebootuser.com
 
-For silent (and clean output) Outfile and keyword(s) can be supplied from the command line:
-usage ./LinEnum.sh outfile.txt 'keyword1 keyword2'
+Note: Export functionality is currently in the experimental stage.
 
-Thanks to @roo7break for the above reporting functionality
+General usage:
 
-# Notes:
-LinEnum_sh.sh should be used for /bin/sh shell as search capability within 0.4 version is not working as expected (/bin/bash compatibility only).
+version 0.5
+
+* Example: ./LinEnum.sh -k keyword -r report -e /tmp/ -t 
+
+OPTIONS:
+-k	Enter keyword
+-e	Enter export location
+-t	Include thorough (lengthy) tests
+-r	Enter report name
+-h	Displays this help text
+
+
+Running with no options = limited scans/no output file
+
+-e Requires the user enters an output location i.e. /tmp/export. If this location does not exist, it will be created.
+-r Requires the user to enter a report name. The report (.txt file) will be saved to the current working directory.
+-t Performs thorough (slow) tests. Without this switch default 'quick' scans are performed.
+-k An optional switch for which the user can search for a single keyword within many files (documented below).
 
 See CHANGELOG.md for further details
 
@@ -25,6 +40,8 @@ High-level summary of the checks/tasks performed by LinEnum:
  * Last logged on users
  * List all users including uid/gid information
  * List root accounts
+ * Extracts password policies and hash storage method information
+ * Checks umask value
  * Checks if password hashes are stored in /etc/passwd
  * Extract full details for ‘default’ uid’s such as 0, 1000, 1001 etc
  * Attempt to read restricted files i.e. /etc/shadow
@@ -64,7 +81,7 @@ High-level summary of the checks/tasks performed by LinEnum:
  * Locate ‘interesting’ SUID/GUID files (i.e. nmap, vim etc)
  * List all world-writable files
  * Find/list all accessible *.plan files and display contents
- * Find/list all accesible *.rhosts files and display contents
+ * Find/list all accessible *.rhosts files and display contents
  * Show NFS server details
  * Locate *.conf and *.log files containing keyword supplied at script runtime
  * List all *.conf files located in /etc

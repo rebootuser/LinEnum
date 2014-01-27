@@ -1,6 +1,25 @@
 # Changelog
 
-## V0.4 (release 05-8-2013)
+Note: Export functionality is currently in the experimental stage.
+
+## V0.5 (release 27-01-2014)
+Additions
+* Interface tweaks including the following additional switches:
+** -e :export functionality
+** -r :generate report output
+** -t :perform thorough tests
+* Thorough tests include lengthy checks, if the -t switch is absent, a default 'quick' scan is performed
+* Export functionality copies 'interesting' files to a specified location for offline analysis
+* Checks added for inetd.conf binary ownership
+* Extracts password policy and hashing information from /etc/login.defs
+* Checks umask value
+
+Modifications
+* Reporting functionality now has a dependency on 'tee'
+* Fixed/modified user/group scan
+* Tidied sudoer file extraction command
+
+## V0.4 (release 05-08-2013)
 Additions
 * Added basic usage details to display on start-up
 * Added cron.deny/cron.allow checks
