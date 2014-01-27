@@ -10,19 +10,19 @@ version 0.5
 * Example: ./LinEnum.sh -k keyword -r report -e /tmp/ -t 
 
 OPTIONS:
--k	Enter keyword
--e	Enter export location
--t	Include thorough (lengthy) tests
--r	Enter report name
--h	Displays this help text
+* -k	Enter keyword
+* -e	Enter export location
+* -t	Include thorough (lengthy) tests
+* -r	Enter report name
+* -h	Displays this help text
 
 
 Running with no options = limited scans/no output file
 
--e Requires the user enters an output location i.e. /tmp/export. If this location does not exist, it will be created.
--r Requires the user to enter a report name. The report (.txt file) will be saved to the current working directory.
--t Performs thorough (slow) tests. Without this switch default 'quick' scans are performed.
--k An optional switch for which the user can search for a single keyword within many files (documented below).
+* -e Requires the user enters an output location i.e. /tmp/export. If this location does not exist, it will be created.
+* -r Requires the user to enter a report name. The report (.txt file) will be saved to the current working directory.
+* -t Performs thorough (slow) tests. Without this switch default 'quick' scans are performed.
+* -k An optional switch for which the user can search for a single keyword within many files (documented below).
 
 See CHANGELOG.md for further details
 
