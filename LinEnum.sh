@@ -271,6 +271,17 @@ else
   :
 fi
 
+#looks for files we can write to that don't belong to us
+if [ "$thorough" = "1" ]; then
+  grfilesall=`find / -writable -not -user \`whoami\` -type f -not -path "/proc/*" -exec ls -al {} \; 2>/dev/null`
+  if [ "$grfilesall" ]; then
+    echo -e "\e[00;31mFiles not owned by user but writable by group:\e[00m\n$grfilesall" |tee -a $report 2>/dev/null
+    echo -e "\n" |tee -a $report 2>/dev/null
+  else
+    :
+  fi
+fi
+
 #looks for world-reabable files within /home - depending on number of /home dirs & files, this can take some time so is only 'activated' with thorough scanning switch
 if [ "$thorough" = "1" ]; then
 wrfileshm=`find /home/ -perm -4 -type f -exec ls -al {} \; 2>/dev/null`
