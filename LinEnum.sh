@@ -236,7 +236,7 @@ else
 fi
 
 #can we sudo without supplying a password
-sudoperms=`echo '' | sudo -S -l 2>/dev/null`
+sudoperms=`echo '' | sudo -S -l -k 2>/dev/null`
 if [ "$sudoperms" ]; then
   echo -e "\e[00;33mWe can sudo without supplying a password!\e[00m\n$sudoperms" |tee -a $report 2>/dev/null
   echo -e "\n" |tee -a $report 2>/dev/null
