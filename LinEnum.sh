@@ -777,7 +777,7 @@ echo -e "\n" |tee -a $report 2>/dev/null
 
 #search for suid files - this can take some time so is only 'activated' with thorough scanning switch (as are all suid scans below)
 if [ "$thorough" = "1" ]; then
-findsuid=`find / -perm -4000 -type f 2>/dev/null`
+findsuid=`find / -perm -4000 -type f -exec stat -c '%A %n' {} + 2>/dev/null`
 	if [ "$findsuid" ]; then
 		echo -e "\e[00;31mSUID files:\e[00m\n$findsuid" |tee -a $report 2>/dev/null
 		echo -e "\n" |tee -a $report 2>/dev/null
