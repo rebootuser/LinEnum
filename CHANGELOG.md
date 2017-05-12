@@ -2,6 +2,20 @@
 
 Note: Export functionality is currently in the experimental stage.
 
+## V0.6 (release 12-05-2017)
+Additions
+* ARP information added
+* Shows users currently logged onto the host
+* Added checks to show env information
+* Displays enabled Apache modules
+* Checks to see if we're in a Docker container
+* Checks to see if we're hosting Docker services
+
+Modifications
+* Tweaked the SSH search as we were getting false negatives
+* Tweaked the searches used for SUID, GUID binaries
+* Fixed issues with some commands not, or incorrectly, redirecting to error
+
 ## V0.5 (release 27-01-2014)
 Additions
 * Interface tweaks including the following additional switches:
