@@ -1,7 +1,7 @@
 #!/bin/bash
 #A script to enumerate local information from a Linux host
-v="version 0.5 (experimental)"
-#@oshearing
+v="version 0.6"
+#@rebootuser
 
 #help function
 usage () 
@@ -9,7 +9,7 @@ usage ()
 echo -e "\n\e[00;31m#########################################################\e[00m" 
 echo -e "\e[00;31m#\e[00m" "\e[00;33mLocal Linux Enumeration & Privilege Escalation Script\e[00m" "\e[00;31m#\e[00m"
 echo -e "\e[00;31m#########################################################\e[00m"
-echo -e "\e[00;33m# www.rebootuser.com\e[00m"
+echo -e "\e[00;33m# www.rebootuser.com | @rebootuser \e[00m"
 echo -e "\e[00;33m# $v\e[00m\n"
 echo -e "\e[00;33m# Example: ./LinEnum.sh -k keyword -r report -e /tmp/ -t \e[00m\n"
 
@@ -71,13 +71,13 @@ sleep 2
 
 if [ "$export" ]; then
   mkdir $export 2>/dev/null
-  format=$export/LinEnum-export-`date +"%d-%m-%y_%H:%M"`
+  format=$export/LinEnum-export-`date +"%d-%m-%y_%k:%M"`
   mkdir $format 2>/dev/null
 else 
   :
 fi
 
-who=`whoami` |tee -a $report 2>/dev/null
+who=`whoami` 2>/dev/null |tee -a $report 2>/dev/null
 echo -e "\n" |tee -a $report 2>/dev/null
 
 echo -e "\e[00;33mScan started at:"; date |tee -a $report 2>/dev/null
@@ -132,7 +132,7 @@ else
 fi
 
 #last logged on user information
-lastlogedonusrs=`lastlog |grep -v "Never" 2>/dev/null`
+lastlogedonusrs=`lastlog 2>/dev/null |grep -v "Never" 2>/dev/null`
 if [ "$lastlogedonusrs" ]; then
   echo -e "\e[00;31mUsers that have previously logged onto the system:\e[00m\n$lastlogedonusrs" |tee -a $report 2>/dev/null
   echo -e "\n" |tee -a $report 2>/dev/null
@@ -140,10 +140,11 @@ else
   :
 fi
 
-#strips out username uid and gid values from /etc/passwd
-usrsinfo=`cat /etc/passwd | cut -d ":" -f 1,2,3,4 2>/dev/null`
-if [ "$usrsinfo" ]; then
-  echo -e "\e[00;31mAll users and uid/gid info:\e[00m\n$usrsinfo" |tee -a $report 2>/dev/null
+
+#who else is logged on
+loggedonusrs=`w 2>/dev/null`
+if [ "$loggedonusrs" ]; then
+  echo -e "\e[00;31mWho else is logged on:\e[00m\n$loggedonusrs" |tee -a $report 2>/dev/null
   echo -e "\n" |tee -a $report 2>/dev/null
 else 
   :
@@ -220,7 +221,7 @@ echo -e "\e[00;31mSuper user account(s):\e[00m" | tee -a $report 2>/dev/null; gr
 echo -e "\n" |tee -a $report 2>/dev/null
 
 #pull out vital sudoers info
-sudoers=`cat /etc/sudoers 2>/dev/null | grep -v -e '^$'|grep -v "#"`
+sudoers=`cat /etc/sudoers 2>/dev/null | grep -v -e '^$' 2>/dev/null |grep -v "#" 2>/dev/null`
 if [ "$sudoers" ]; then
   echo -e "\e[00;31mSudoers configuration (condensed):\e[00m$sudoers" | tee -a $report 2>/dev/null
   echo -e "\n" |tee -a $report 2>/dev/null
@@ -245,7 +246,7 @@ else
 fi
 
 #known 'good' breakout binaries
-sudopwnage=`echo '' | sudo -S -l 2>/dev/null | grep -w 'nmap\|perl\|'awk'\|'find'\|'bash'\|'sh'\|'man'\|'more'\|'less'\|'vi'\|'vim'\|'nc'\|'netcat'\|python\|ruby\|lua\|irb' | xargs -r ls -la 2>/dev/null`
+sudopwnage=`echo '' | sudo -S -l 2>/dev/null | grep -w 'nmap\|perl\|'awk'\|'find'\|'bash'\|'sh'\|'man'\|'more'\|'less'\|'vi'\|'emacs'\|'vim'\|'nc'\|'netcat'\|python\|ruby\|lua\|irb' | xargs -r ls -la 2>/dev/null`
 if [ "$sudopwnage" ]; then
   echo -e "\e[00;33m***Possible Sudo PWNAGE!\e[00m\n$sudopwnage" |tee -a $report 2>/dev/null
   echo -e "\n" |tee -a $report 2>/dev/null
@@ -321,7 +322,7 @@ fi
 
 #checks for if various ssh files are accessible - this can take some time so is only 'activated' with thorough scanning switch
 if [ "$thorough" = "1" ]; then
-sshfiles=`find / -name "id_dsa*" -o -name "id_rsa*" -o -name "known_hosts" -o -name "authorized_hosts" -o -name "authorized_keys" 2>/dev/null |xargs -r ls`
+sshfiles=`find / \( -name "id_dsa*" -o -name "id_rsa*" -o -name "known_hosts" -o -name "authorized_hosts" -o -name "authorized_keys" \) -exec ls -la {} 2>/dev/null \;`
 	if [ "$sshfiles" ]; then
 		echo -e "\e[00;31mSSH keys/host information found in the following locations:\e[00m\n$sshfiles" |tee -a $report 2>/dev/null
 		echo -e "\n" |tee -a $report 2>/dev/null
@@ -353,6 +354,15 @@ else
 fi
 
 echo -e "\e[00;33m### ENVIRONMENTAL #######################################\e[00m" |tee -a $report 2>/dev/null
+
+#env information
+envinfo=`env 2>/dev/null | grep -v 'LS_COLORS' 2>/dev/null`
+if [ "$envinfo" ]; then
+  echo -e "\e[00;31m Environment information:\e[00m\n$envinfo" |tee -a $report 2>/dev/null
+  echo -e "\n" |tee -a $report 2>/dev/null
+else 
+  :
+fi
 
 #current path configuration
 pathinfo=`echo $PATH 2>/dev/null`
@@ -418,7 +428,7 @@ else
 fi
 
 #can we manipulate these jobs in any way
-cronjobwwperms=`find /etc/cron* -perm -0002 -exec ls -la {} \; -exec cat {} 2>/dev/null \;`
+cronjobwwperms=`find /etc/cron* -perm -0002 -type f -exec ls -la {} \; -exec cat {} 2>/dev/null \;`
 if [ "$cronjobwwperms" ]; then
   echo -e "\e[00;33m***World-writable cron jobs and file contents:\e[00m\n$cronjobwwperms" |tee -a $report 2>/dev/null
   echo -e "\n" |tee -a $report 2>/dev/null
@@ -479,6 +489,14 @@ else
   :
 fi
 
+arpinfo=`arp -a 2>/dev/null`
+if [ "$arpinfo" ]; then
+  echo -e "\e[00;31mARP history:\e[00m\n$arpinfo" |tee -a $report 2>/dev/null
+  echo -e "\n" |tee -a $report 2>/dev/null
+else 
+  :
+fi
+
 #dns settings
 nsinfo=`cat /etc/resolv.conf 2>/dev/null | grep "nameserver"`
 if [ "$nsinfo" ]; then
@@ -527,7 +545,7 @@ else
 fi
 
 #lookup process binary path and permissisons
-procperm=`ps aux | awk '{print $11}'|xargs -r ls -la 2>/dev/null |awk '!x[$0]++'`
+procperm=`ps aux 2>/dev/null | awk '{print $11}'|xargs -r ls -la 2>/dev/null |awk '!x[$0]++' 2>/dev/null`
 if [ "$procperm" ]; then
   echo -e "\e[00;31mProcess binaries & associated permissions (from above list):\e[00m\n$procperm" |tee -a $report 2>/dev/null
   echo -e "\n" |tee -a $report 2>/dev/null
@@ -536,7 +554,7 @@ else
 fi
 
 if [ "$export" ] && [ "$procperm" ]; then
-procpermbase=`ps aux | awk '{print $11}'|xargs -r ls 2>/dev/null |awk '!x[$0]++'`
+procpermbase=`ps aux 2>/dev/null | awk '{print $11}' | xargs -r ls 2>/dev/null | awk '!x[$0]++' 2>/dev/null`
   mkdir $format/ps-export/ 2>/dev/null
   for i in $procpermbase; do cp --parents $i $format/ps-export/; done 2>/dev/null
 else 
@@ -741,7 +759,7 @@ else
 fi
 
 #what account is apache running under
-apacheusr=`cat /etc/apache2/envvars 2>/dev/null |grep -i 'user\|group' |awk '{sub(/.*\export /,"")}1'`
+apacheusr=`cat /etc/apache2/envvars 2>/dev/null |grep -i 'user\|group' 2>/dev/null |awk '{sub(/.*\export /,"")}1' 2>/dev/null`
 if [ "$apacheusr" ]; then
   echo -e "\e[00;31mApache user configuration:\e[00m\n$apacheusr" |tee -a $report 2>/dev/null
   echo -e "\n" |tee -a $report 2>/dev/null
@@ -752,6 +770,24 @@ fi
 if [ "$export" ] && [ "$apacheusr" ]; then
   mkdir --parents $format/etc-export/apache2/ 2>/dev/null
   cp /etc/apache2/envvars $format/etc-export/apache2/envvars 2>/dev/null
+else 
+  :
+fi
+
+#installed apache modules
+apachemodules=`apache2ctl -M 2>/dev/null; httpd -M 2>/dev/null`
+if [ "$apachemodules" ]; then
+  echo -e "\e[00;31mInstalled Apache modules:\e[00m\n$apachemodules" |tee -a $report 2>/dev/null
+  echo -e "\n" |tee -a $report 2>/dev/null
+else 
+  :
+fi
+
+#anything in the default http home dirs
+apachehomedirs=`ls -alhR /var/www/ 2>/dev/null; ls -alhR /srv/www/htdocs/ 2>/dev/null; ls -alhR /usr/local/www/apache2/data/ 2>/dev/null; ls -alhR /opt/lampp/htdocs/ 2>/dev/null`
+if [ "$apachehomedirs" ]; then
+  echo -e "\e[00;31mAnything in the Apache home dirs?:\e[00m\n$apachehomedirs" |tee -a $report 2>/dev/null
+  echo -e "\n" |tee -a $report 2>/dev/null
 else 
   :
 fi
@@ -777,7 +813,7 @@ echo -e "\n" |tee -a $report 2>/dev/null
 
 #search for suid files - this can take some time so is only 'activated' with thorough scanning switch (as are all suid scans below)
 if [ "$thorough" = "1" ]; then
-findsuid=`find / -perm -4000 -type f -exec stat -c '%A %n' {} + 2>/dev/null`
+findsuid=`find / -perm -4000 -type f -exec ls -la {} 2>/dev/null \;`
 	if [ "$findsuid" ]; then
 		echo -e "\e[00;31mSUID files:\e[00m\n$findsuid" |tee -a $report 2>/dev/null
 		echo -e "\n" |tee -a $report 2>/dev/null
@@ -801,7 +837,7 @@ fi
 
 #list of 'interesting' suid files - feel free to make additions
 if [ "$thorough" = "1" ]; then
-intsuid=`find / -perm -4000 -type f 2>/dev/null | grep -w 'nmap\|perl\|'awk'\|'find'\|'bash'\|'sh'\|'man'\|'more'\|'less'\|'vi'\|'vim'\|'nc'\|'netcat'\|python\|ruby\|lua\|irb\|pl' | xargs -r ls -la` 2>/dev/null
+intsuid=`find / -perm -4000 -type f 2>/dev/null | grep -w 'nmap\|perl\|'awk'\|'find'\|'bash'\|'sh'\|'man'\|'more'\|'less'\|'vi'\|'vim'\|'emacs'\|'nc'\|'netcat'\|python\|ruby\|lua\|irb\|pl' | xargs -r ls -la 2>/dev/null`
 	if [ "$intsuid" ]; then
 		echo -e "\e[00;33m***Possibly interesting SUID files:\e[00m\n$intsuid" |tee -a $report 2>/dev/null
 		echo -e "\n" |tee -a $report 2>/dev/null
@@ -814,7 +850,7 @@ fi
 
 #lists word-writable suid files
 if [ "$thorough" = "1" ]; then
-wwsuid=`find / -perm -4007 -type f 2>/dev/null`
+wwsuid=`find / -perm -4007 -type f -exec ls -la {} 2>/dev/null \;`
 	if [ "$wwsuid" ]; then
 		echo -e "\e[00;31mWorld-writable SUID files:\e[00m\n$wwsuid" |tee -a $report 2>/dev/null
 		echo -e "\n" |tee -a $report 2>/dev/null
@@ -827,7 +863,7 @@ fi
 
 #lists world-writable suid files owned by root
 if [ "$thorough" = "1" ]; then
-wwsuidrt=`find / -uid 0 -perm -4007 -type f 2>/dev/null`
+wwsuidrt=`find / -uid 0 -perm -4007 -type f -exec ls -la {} 2>/dev/null \;`
 	if [ "$wwsuidrt" ]; then
 		echo -e "\e[00;31mWorld-writable SUID files owned by root:\e[00m\n$wwsuidrt" |tee -a $report 2>/dev/null
 		echo -e "\n" |tee -a $report 2>/dev/null
@@ -840,7 +876,7 @@ fi
 
 #search for guid files - this can take some time so is only 'activated' with thorough scanning switch (as are all guid scans below)
 if [ "$thorough" = "1" ]; then
-findguid=`find / -perm -2000 -type f 2>/dev/null`
+findguid=`find / -perm -2000 -type f -exec ls -la {} 2>/dev/null \;`
 	if [ "$findguid" ]; then
 		echo -e "\e[00;31mGUID files:\e[00m\n$findguid" |tee -a $report 2>/dev/null
 		echo -e "\n" |tee -a $report 2>/dev/null
@@ -864,7 +900,7 @@ fi
 
 #list of 'interesting' guid files - feel free to make additions
 if [ "$thorough" = "1" ]; then
-intguid=`find / -perm -2000 -type f 2>/dev/null | grep -w 'nmap\|perl\|'awk'\|'find'\|'bash'\|'sh'\|'man'\|'more'\|'less'\|'vi'\|'vim'\|'nc'\|'netcat'\|python\|ruby\|lua\|irb\|pl' | xargs -r ls -la`
+intguid=`find / -perm -2000 -type f 2>/dev/null | grep -w 'nmap\|perl\|'awk'\|'find'\|'bash'\|'sh'\|'man'\|'more'\|'less'\|'vi'\|'emacs'\|'vim'\|'nc'\|'netcat'\|python\|ruby\|lua\|irb\|pl' | xargs -r ls -la 2>/dev/null`
 	if [ "$intguid" ]; then
 		echo -e "\e[00;33m***Possibly interesting GUID files:\e[00m\n$intguid" |tee -a $report 2>/dev/null
 		echo -e "\n" |tee -a $report 2>/dev/null
@@ -877,7 +913,7 @@ fi
 
 #lists world-writable guid files
 if [ "$thorough" = "1" ]; then
-wwguid=`find / -perm -2007 -type f 2>/dev/null`
+wwguid=`find / -perm -2007 -type f -exec ls -la {} 2>/dev/null \;`
 	if [ "$wwguid" ]; then
 		echo -e "\e[00;31mWorld-writable GUID files:\e[00m\n$wwguid" |tee -a $report 2>/dev/null
 		echo -e "\n" |tee -a $report 2>/dev/null
@@ -890,7 +926,7 @@ fi
 
 #lists world-writable guid files owned by root
 if [ "$thorough" = "1" ]; then
-wwguidrt=`find / -uid 0 -perm -2007 -type f 2>/dev/null`
+wwguidrt=`find / -uid 0 -perm -2007 -type f -exec ls -la {} 2>/dev/null \;`
 	if [ "$wwguidrt" ]; then
 		echo -e "\e[00;31mAWorld-writable GUID files owned by root:\e[00m\n$wwguidrt" |tee -a $report 2>/dev/null
 		echo -e "\n" |tee -a $report 2>/dev/null
@@ -903,7 +939,7 @@ fi
 
 #list all world-writable files excluding /proc
 if [ "$thorough" = "1" ]; then
-wwfiles=`find / ! -path "*/proc/*" -perm -2 -type f -print 2>/dev/null`
+wwfiles=`find / ! -path "*/proc/*" -perm -2 -type f -exec ls -la {} 2>/dev/null \;`
 	if [ "$wwfiles" ]; then
 		echo -e "\e[00;31mWorld-writable files (excluding /proc):\e[00m\n$wwfiles" |tee -a $report 2>/dev/null
 		echo -e "\n" |tee -a $report 2>/dev/null
@@ -1019,7 +1055,7 @@ else
 fi
 
 #looking for credentials in /etc/fstab
-fstab=`cat /etc/fstab 2>/dev/null |grep username |awk '{sub(/.*\username=/,"");sub(/\,.*/,"")}1'| xargs -r echo username:; cat /etc/fstab 2>/dev/null |grep password |awk '{sub(/.*\password=/,"");sub(/\,.*/,"")}1'| xargs -r echo password:; cat /etc/fstab 2>/dev/null |grep domain |awk '{sub(/.*\domain=/,"");sub(/\,.*/,"")}1'| xargs -r echo domain:`
+fstab=`cat /etc/fstab 2>/dev/null |grep username |awk '{sub(/.*\username=/,"");sub(/\,.*/,"")}1' 2>/dev/null| xargs -r echo username: 2>/dev/null; cat /etc/fstab 2>/dev/null |grep password |awk '{sub(/.*\password=/,"");sub(/\,.*/,"")}1' 2>/dev/null| xargs -r echo password: 2>/dev/null; cat /etc/fstab 2>/dev/null |grep domain |awk '{sub(/.*\domain=/,"");sub(/\,.*/,"")}1' 2>/dev/null| xargs -r echo domain: 2>/dev/null`
 if [ "$fstab" ]; then
   echo -e "\e[00;33m***Looks like there are credentials in /etc/fstab!\e[00m\n$fstab" |tee -a $report 2>/dev/null
   echo -e "\n" |tee -a $report 2>/dev/null
@@ -1034,7 +1070,7 @@ else
   :
 fi
 
-fstabcred=`cat /etc/fstab 2>/dev/null |grep cred |awk '{sub(/.*\credentials=/,"");sub(/\,.*/,"")}1'| xargs -I{} sh -c 'ls -la {}; cat {}'`
+fstabcred=`cat /etc/fstab 2>/dev/null |grep cred |awk '{sub(/.*\credentials=/,"");sub(/\,.*/,"")}1' 2>/dev/null | xargs -I{} sh -c 'ls -la {}; cat {}' 2>/dev/null`
 if [ "$fstabcred" ]; then
     echo -e "\e[00;33m***/etc/fstab contains a credentials file!\e[00m\n$fstabcred" |tee -a $report 2>/dev/null
     echo -e "\n" |tee -a $report 2>/dev/null
@@ -1199,6 +1235,51 @@ fi
 if [ "$export" ] && [ "$readmailroot" ]; then
   mkdir $format/mail-from-root/ 2>/dev/null
   cp $readmailroot $format/mail-from-root/ 2>/dev/null
+else 
+  :
+fi
+
+#specific checks - check to see if we're in a docker container
+dockercontainer=`cat /proc/self/cgroup 2>/dev/null | grep -i docker 2>/dev/null; find / -name "*dockerenv*" -exec ls -la {} \; 2>/dev/null`
+if [ "$dockercontainer" ]; then
+  echo -e "\e[00;33mLooks like we're in a Docker container:\e[00m\n$dockercontainer" |tee -a $report 2>/dev/null
+  echo -e "\n" |tee -a $report 2>/dev/null
+else 
+  :
+fi
+
+#specific checks - check to see if we're a docker host
+dockerhost=`docker --version 2>/dev/null; docker ps -a 2>/dev/null`
+if [ "$dockerhost" ]; then
+  echo -e "\e[00;33mLooks like we're hosting Docker:\e[00m\n$dockerhost" |tee -a $report 2>/dev/null
+  echo -e "\n" |tee -a $report 2>/dev/null
+else 
+  :
+fi
+
+#specific checks - are we a member of the docker group
+dockergrp=`id | grep -i docker 2>/dev/null`
+if [ "$dockergrp" ]; then
+  echo -e "\e[00;33mWe're a member of the (docker) group - could possibly misuse these rights!:\e[00m\n$dockergrp" |tee -a $report 2>/dev/null
+  echo -e "\n" |tee -a $report 2>/dev/null
+else 
+  :
+fi
+
+#specific checks - are there any docker files present
+dockerfiles=`find / -name Dockerfile -exec ls -l {} 2>/dev/null \;`
+if [ "$dockerfiles" ]; then
+  echo -e "\e[00;31mAnything juicy in the Dockerfile?:\e[00m\n$dockerfiles" |tee -a $report 2>/dev/null
+  echo -e "\n" |tee -a $report 2>/dev/null
+else 
+  :
+fi
+
+#specific checks - are there any docker files present
+dockeryml=`find / -name docker-compose.yml -exec ls -l {} 2>/dev/null \;`
+if [ "$dockeryml" ]; then
+  echo -e "\e[00;31mAnything juicy in docker-compose.yml?:\e[00m\n$dockeryml" |tee -a $report 2>/dev/null
+  echo -e "\n" |tee -a $report 2>/dev/null
 else 
   :
 fi
