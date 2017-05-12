@@ -71,7 +71,7 @@ sleep 2
 
 if [ "$export" ]; then
   mkdir $export 2>/dev/null
-  format=$export/LinEnum-export-`date +"%d-%m-%y_%k:%M"`
+  format=$export/LinEnum-export-`date +"%d-%m-%y"`
   mkdir $format 2>/dev/null
 else 
   :
