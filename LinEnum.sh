@@ -162,8 +162,15 @@ fi
 #lists all id's and respective group(s)
 grpinfo=`for i in $(cat /etc/passwd 2>/dev/null| cut -d":" -f1 2>/dev/null);do id $i;done 2>/dev/null`
 if [ "$grpinfo" ]; then
-  echo -e "\e[00;31mGroup memberships:\e[00m\n$grpinfo" 
-  echo -e "\n" 
+  echo -e "\e[00;31mGroup memberships:\e[00m\n$grpinfo"
+  #added by phackt - look for adm group (thanks patrick)
+  adm_users=$(echo -e "$grpinfo" | grep "(adm)")
+  if [[ ! -z $adm_users ]];
+  then
+    echo -e "\nSeems we met some admin users!!!\n"
+    echo -e "$adm_users\n"
+  fi
+  echo -e "\n"
 else 
   :
 fi
@@ -375,6 +382,15 @@ if [ "$envinfo" ]; then
 else 
   :
 fi
+
+#check if selinux is enabled
+sestatus=`sestatus 2>/dev/null`
+if [ "$sestatus" ]; then
+  echo -e "\e[00;31mSELinux seems present:\e[00m\n$sestatus"
+  echo -e "\n"
+fi
+
+#phackt
 
 #current path configuration
 pathinfo=`echo $PATH 2>/dev/null`
@@ -1077,11 +1093,22 @@ else
   :
 fi
 
+if [ "$thorough" = "1" ]; then
+  #phackt
+  #displaying /etc/fstab
+  fstab=`cat /etc/fstab 2>/dev/null`
+  if [ "$fstab" ]; then
+    echo -e "\e[00;31mNFS displaying partitions and filesystems - you need to check if exotic filesystems\e[00m"
+    echo -e "$fstab"
+    echo -e "\n"
+  fi
+fi
+
 #looking for credentials in /etc/fstab
 fstab=`cat /etc/fstab 2>/dev/null |grep username |awk '{sub(/.*\username=/,"");sub(/\,.*/,"")}1' 2>/dev/null| xargs -r echo username: 2>/dev/null; cat /etc/fstab 2>/dev/null |grep password |awk '{sub(/.*\password=/,"");sub(/\,.*/,"")}1' 2>/dev/null| xargs -r echo password: 2>/dev/null; cat /etc/fstab 2>/dev/null |grep domain |awk '{sub(/.*\domain=/,"");sub(/\,.*/,"")}1' 2>/dev/null| xargs -r echo domain: 2>/dev/null`
 if [ "$fstab" ]; then
-  echo -e "\e[00;33m***Looks like there are credentials in /etc/fstab!\e[00m\n$fstab" 
-  echo -e "\n" 
+  echo -e "\e[00;33m***Looks like there are credentials in /etc/fstab!\e[00m\n$fstab"
+  echo -e "\n"
   else 
   :
 fi
