@@ -109,6 +109,14 @@ else
   :
 fi
 
+if [ "$thorough" = "1" ]; then
+  kernel_modules=`cat /proc/modules 2>/dev/null`
+  if [ $kernel_modules ]; then
+    echo -e "\e[00;31mVarious Kernel Modules that are loaded in memory:\e[00m\n$kernel_modules"
+    echo -e "\n"
+  fi
+fi
+
 #target hostname info
 hostnamed=`hostname 2>/dev/null`
 if [ "$hostnamed" ]; then
