@@ -1,6 +1,6 @@
 #!/bin/bash
 #A script to enumerate local information from a Linux host
-v="version 0.6-1"
+v="version 0.6-2"
 #@rebootuser
 
 #help function
@@ -160,7 +160,7 @@ else
 fi
 
 #lists all id's and respective group(s)
-grpinfo=`for i in $(cat /etc/passwd 2>/dev/null| cut -d":" -f1 2>/dev/null);do id $i;done 2>/dev/null`
+grpinfo=`for i in $(cut -d":" -f1 /etc/passwd 2>/dev/null);do id $i;done 2>/dev/null`
 if [ "$grpinfo" ]; then
   echo -e "\e[00;31mGroup memberships:\e[00m\n$grpinfo"
   #added by phackt - look for adm group (thanks patrick)
@@ -237,7 +237,7 @@ echo -e "\e[00;31mSuper user account(s):\e[00m" | tee -a $report 2>/dev/null; gr
 echo -e "\n" 
 
 #pull out vital sudoers info
-sudoers=`cat /etc/sudoers 2>/dev/null | grep -v -e '^$' 2>/dev/null |grep -v "#" 2>/dev/null`
+sudoers=`grep -v -e '^$' /etc/sudoers 2>/dev/null |grep -v "#" 2>/dev/null`
 if [ "$sudoers" ]; then
   echo -e "\e[00;31mSudoers configuration (condensed):\e[00m$sudoers" | tee -a $report 2>/dev/null
   echo -e "\n" 
@@ -420,7 +420,7 @@ else
 fi
 
 #umask value as in /etc/login.defs
-umaskdef=`cat /etc/login.defs 2>/dev/null |grep -i UMASK 2>/dev/null |grep -v "#" 2>/dev/null`
+umaskdef=`grep -i "^UMASK" /etc/login.defs 2>/dev/null`
 if [ "$umaskdef" ]; then
   echo -e "\e[00;31mumask value as specified in /etc/login.defs:\e[00m\n$umaskdef" 
   echo -e "\n" 
@@ -429,7 +429,7 @@ else
 fi
 
 #password policy information as stored in /etc/login.defs
-logindefs=`cat /etc/login.defs 2>/dev/null | grep "PASS_MAX_DAYS\|PASS_MIN_DAYS\|PASS_WARN_AGE\|ENCRYPT_METHOD" 2>/dev/null | grep -v "#" 2>/dev/null`
+logindefs=`grep "^PASS_MAX_DAYS\|^PASS_MIN_DAYS\|^PASS_WARN_AGE\|^ENCRYPT_METHOD" /etc/login.defs 2>/dev/null`
 if [ "$logindefs" ]; then
   echo -e "\e[00;31mPassword and storage information:\e[00m\n$logindefs" 
   echo -e "\n" 
@@ -501,7 +501,7 @@ else
 fi
 
 #pull out account names from /etc/passwd and see if any users have associated cronjobs (priv command)
-cronother=`cat /etc/passwd | cut -d ":" -f 1 | xargs -n1 crontab -l -u 2>/dev/null`
+cronother=`cut -d ":" -f 1 /etc/passwd | xargs -n1 crontab -l -u 2>/dev/null`
 if [ "$cronother" ]; then
   echo -e "\e[00;31mJobs held by all users:\e[00m\n$cronother" 
   echo -e "\n" 
@@ -531,7 +531,7 @@ else
 fi
 
 #dns settings
-nsinfo=`cat /etc/resolv.conf 2>/dev/null | grep "nameserver"`
+nsinfo=`grep "nameserver" /etc/resolv.conf 2>/dev/null`
 if [ "$nsinfo" ]; then
   echo -e "\e[00;31mNameserver(s):\e[00m\n$nsinfo" 
   echo -e "\n" 
@@ -613,7 +613,7 @@ else
 fi
 
 #very 'rough' command to extract associated binaries from inetd.conf & show permisisons of each
-inetdbinperms=`cat /etc/inetd.conf 2>/dev/null | awk '{print $7}' |xargs -r ls -la 2>/dev/null`
+inetdbinperms=`awk '{print $7}' /etc/inetd.conf 2>/dev/null |xargs -r ls -la 2>/dev/null`
 if [ "$inetdbinperms" ]; then
   echo -e "\e[00;31mThe related inetd binary permissions:\e[00m\n$inetdbinperms" 
   echo -e "\n" 
@@ -636,7 +636,7 @@ else
   :
 fi
 
-xinetdincd=`cat /etc/xinetd.conf 2>/dev/null |grep "/etc/xinetd.d" 2>/dev/null`
+xinetdincd=`grep "/etc/xinetd.d" /etc/xinetd.conf 2>/dev/null`
 if [ "$xinetdincd" ]; then
   echo -e "\e[00;31m/etc/xinetd.d is included in /etc/xinetd.conf - associated binary permissions are listed below:\e[00m" ls -la /etc/xinetd.d 2>/dev/null 
   echo -e "\n" 
@@ -645,7 +645,7 @@ else
 fi
 
 #very 'rough' command to extract associated binaries from xinetd.conf & show permisisons of each
-xinetdbinperms=`cat /etc/xinetd.conf 2>/dev/null | awk '{print $7}' |xargs -r ls -la 2>/dev/null`
+xinetdbinperms=`awk '{print $7}' /etc/xinetd.conf 2>/dev/null |xargs -r ls -la 2>/dev/null`
 if [ "$xinetdbinperms" ]; then
   echo -e "\e[00;31mThe related xinetd binary permissions:\e[00m\n$xinetdbinperms" 
   echo -e "\n" 
@@ -796,7 +796,7 @@ else
 fi
 
 #what account is apache running under
-apacheusr=`cat /etc/apache2/envvars 2>/dev/null |grep -i 'user\|group' 2>/dev/null |awk '{sub(/.*\export /,"")}1' 2>/dev/null`
+apacheusr=`grep -i 'user\|group' /etc/apache2/envvars 2>/dev/null |awk '{sub(/.*\export /,"")}1' 2>/dev/null`
 if [ "$apacheusr" ]; then
   echo -e "\e[00;31mApache user configuration:\e[00m\n$apacheusr" 
   echo -e "\n" 
@@ -1105,7 +1105,7 @@ if [ "$thorough" = "1" ]; then
 fi
 
 #looking for credentials in /etc/fstab
-fstab=`cat /etc/fstab 2>/dev/null |grep username |awk '{sub(/.*\username=/,"");sub(/\,.*/,"")}1' 2>/dev/null| xargs -r echo username: 2>/dev/null; cat /etc/fstab 2>/dev/null |grep password |awk '{sub(/.*\password=/,"");sub(/\,.*/,"")}1' 2>/dev/null| xargs -r echo password: 2>/dev/null; cat /etc/fstab 2>/dev/null |grep domain |awk '{sub(/.*\domain=/,"");sub(/\,.*/,"")}1' 2>/dev/null| xargs -r echo domain: 2>/dev/null`
+fstab=`grep username /etc/fstab 2>/dev/null |awk '{sub(/.*\username=/,"");sub(/\,.*/,"")}1' 2>/dev/null| xargs -r echo username: 2>/dev/null; grep password /etc/fstab 2>/dev/null |awk '{sub(/.*\password=/,"");sub(/\,.*/,"")}1' 2>/dev/null| xargs -r echo password: 2>/dev/null; grep domain /etc/fstab 2>/dev/null |awk '{sub(/.*\domain=/,"");sub(/\,.*/,"")}1' 2>/dev/null| xargs -r echo domain: 2>/dev/null`
 if [ "$fstab" ]; then
   echo -e "\e[00;33m***Looks like there are credentials in /etc/fstab!\e[00m\n$fstab"
   echo -e "\n"
@@ -1120,7 +1120,7 @@ else
   :
 fi
 
-fstabcred=`cat /etc/fstab 2>/dev/null |grep cred |awk '{sub(/.*\credentials=/,"");sub(/\,.*/,"")}1' 2>/dev/null | xargs -I{} sh -c 'ls -la {}; cat {}' 2>/dev/null`
+fstabcred=`grep cred /etc/fstab 2>/dev/null |awk '{sub(/.*\credentials=/,"");sub(/\,.*/,"")}1' 2>/dev/null | xargs -I{} sh -c 'ls -la {}; cat {}' 2>/dev/null`
 if [ "$fstabcred" ]; then
     echo -e "\e[00;33m***/etc/fstab contains a credentials file!\e[00m\n$fstabcred" 
     echo -e "\n" 
@@ -1292,7 +1292,7 @@ fi
 docker_checks()
 {
 #specific checks - check to see if we're in a docker container
-dockercontainer=`cat /proc/self/cgroup 2>/dev/null | grep -i docker 2>/dev/null; find / -name "*dockerenv*" -exec ls -la {} \; 2>/dev/null`
+dockercontainer=` grep -i docker /proc/self/cgroup  2>/dev/null; find / -name "*dockerenv*" -exec ls -la {} \; 2>/dev/null`
 if [ "$dockercontainer" ]; then
   echo -e "\e[00;33mLooks like we're in a Docker container:\e[00m\n$dockercontainer" 
   echo -e "\n" 
@@ -1340,8 +1340,8 @@ fi
 lxc_container_checks()
 {
   #specific checks - are we in an lxd/lxc container
-  lxccontainer = `grep -qa container=lxc /proc/1/environ`
-  if ["$lxccontainer"]; then
+  lxccontainer=`grep -qa container=lxc /proc/1/environ 2>/dev/null`
+  if [ "$lxccontainer" ]; then
     echo -e "\e[00;33mLooks like we're in an lxc container:\e[00m\n$lxccontainer"
     echo -e "\n"
   fi

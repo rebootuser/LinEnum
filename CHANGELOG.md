@@ -10,7 +10,7 @@ Additions
 * SELinux Presence
 
 Modifications
-* Code optimization: everything is in functions.
+* Code optimization: everything is in functions, cat grep awk pair optimized.
 
 ## V0.6 (release 12-05-2017)
 Additions
