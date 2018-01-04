@@ -1337,6 +1337,24 @@ else
 fi
 }
 
+lxc_container_checks()
+{
+  #specific checks - are we in an lxd/lxc container
+  lxccontainer = `grep -qa container=lxc /proc/1/environ`
+  if ["$lxccontainer"]; then
+    echo -e "\e[00;33mLooks like we're in an lxc container:\e[00m\n$lxccontainer"
+    echo -e "\n"
+  fi
+
+  #specific checks - are we a member of the lxd group
+  lxdgroup=`id | grep -i lxd 2>/dev/null`
+  if [ "$lxdgroup" ]; then
+    echo -e "\e[00;33mWe're a member of the (lxd) group - could possibly misuse these rights!:\e[00m\n$lxdgroup"
+    echo -e "\n"
+  fi
+
+}
+
 footer()
 {
 echo -e "\e[00;33m### SCAN COMPLETE ####################################\e[00m" 
@@ -1355,6 +1373,7 @@ call_each()
   software_configs
   interesting_files
   docker_checks
+  lxc_container_checks
   footer
 }
 
