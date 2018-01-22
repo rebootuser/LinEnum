@@ -1,6 +1,6 @@
 #!/bin/bash
 #A script to enumerate local information from a Linux host
-v="version 0.6-2"
+v="version 0.7"
 #@rebootuser
 
 #help function
@@ -638,7 +638,7 @@ fi
 
 xinetdincd=`grep "/etc/xinetd.d" /etc/xinetd.conf 2>/dev/null`
 if [ "$xinetdincd" ]; then
-  echo -e "\e[00;31m/etc/xinetd.d is included in /etc/xinetd.conf - associated binary permissions are listed below:\e[00m" ls -la /etc/xinetd.d 2>/dev/null 
+  echo -e "\e[00;31m/etc/xinetd.d is included in /etc/xinetd.conf - associated binary permissions are listed below:\e[00m"; ls -la /etc/xinetd.d 2>/dev/null 
   echo -e "\n" 
 else 
   :
