@@ -2,6 +2,16 @@
 
 Note: Export functionality is currently in the experimental stage.
 
+## V0.7 (work in progress)
+Additions
+* LX Container checks
+* Loaded Kernel Modules list
+* adm group listing
+* SELinux Presence
+
+Modifications
+* Code optimization: everything is in functions, cat grep awk pair optimized.
+
 ## V0.6 (release 12-05-2017)
 Additions
 * ARP information added
