@@ -7,6 +7,7 @@ Additions
 * Prints contents of users .bash_history (if found)
 * Looks for users that have used sudo
 * Checks for htpasswd files
+* Lists hidden files
 * Further checks/output in regards to viewing files the user owns
 * Additional checks using newer ip commands
 * Added PHP search for keywords
