@@ -2,7 +2,20 @@
 
 Note: Export functionality is currently in the experimental stage.
 
-## V0.7 (work in progress)
+## V0.8 (release 12-04-2018)
+Additions
+* Prints contents of users .bash_history (if found)
+* Looks for users that have used sudo
+* Checks for htpasswd files
+* Further checks/output in regards to viewing files the user owns
+* Additional checks using newer ip commands
+* Added PHP search for keywords
+
+Modifications
+* Code/commands cleaned
+* Added [+] and [-] to output, to aid in searching through the generated report
+
+## V0.7 (22-01-2018)
 Additions
 * LX Container checks
 * Loaded Kernel Modules list
