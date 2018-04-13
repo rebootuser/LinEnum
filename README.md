@@ -5,7 +5,7 @@ Note: Export functionality is currently in the experimental stage.
 
 General usage:
 
-version 0.7 (work in progress)
+version 0.8
 
 * Example: ./LinEnum.sh -k keyword -r report -e /tmp/ -t 
 
@@ -49,6 +49,7 @@ High-level summary of the checks/tasks performed by LinEnum:
   * List current users history files (i.e .bash_history, .nano_history etc.)
   * Basic SSH checks
 * Privileged access:
+  * Which users have recently used sudo
   * Determine if /etc/sudoers is accessible
   * Determine if the current user has Sudo access without a password
   * Are known ‘good’ breakout binaries available via Sudo (i.e. nmap, vim etc.)
@@ -74,6 +75,8 @@ High-level summary of the checks/tasks performed by LinEnum:
   * Apache
     * Checks user config
     * Shows enabled modules
+    * Checks for htpasswd files
+    * View www directories
 * Default/Weak Credentials:
   * Checks for default/weak Postgres accounts
   * Checks for default/weak MYSQL accounts
