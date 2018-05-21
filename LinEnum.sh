@@ -262,7 +262,7 @@ else
 fi
 
 #known 'good' breakout binaries
-sudopwnage=`echo '' | sudo -S -l 2>/dev/null | grep -w 'nmap\|perl\|'awk'\|'find'\|'bash'\|'sh'\|'man'\|'more'\|'less'\|'vi'\|'emacs'\|'vim'\|'nc'\|'netcat'\|python\|ruby\|lua\|irb' | xargs -r ls -la 2>/dev/null`
+sudopwnage=`echo '' | sudo -S -l 2>/dev/null | grep -w 'nmap\|perl\|'awk'\|'find'\|'bash'\|'sh'\|'man'\|'more'\|'less'\|'vi'\|'emacs'\|'vim'\|'nc'\|'netcat'\|python\|ruby\|lua\|irb\|tar\|zip\|gdb\|pico\|scp\|ssh\|git\|rvim\|script' | xargs -r ls -la 2>/dev/null`
 if [ "$sudopwnage" ]; then
   echo -e "\e[00;33m[+] Possible sudo pwnage!\e[00m\n$sudopwnage" 
   echo -e "\n" 
