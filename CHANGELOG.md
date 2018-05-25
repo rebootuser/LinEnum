@@ -2,6 +2,15 @@
 
 Note: Export functionality is currently in the experimental stage.
 
+## V0.9 (release 25-05-2018)
+Additions
+* Sudo/suid/guid binary list expanded to include entries from https://gtfobins.github.io/
+* -s switch introduced. This allows you to supply the current user password for authenticated sudo 'checks'. Note; this is INSECURE and is really only for use in CTF environments
+
+Modifications
+* Sudo/suid/guid searches modified & bug in sudo parsing (when multiple entries are separated by commas) fixed
+* Apache home dir output moved to thorough checks (due to extensive output)
+
 ## V0.8 (release 12-04-2018)
 Additions
 * Prints contents of users .bash_history (if found)

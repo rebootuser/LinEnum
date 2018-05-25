@@ -1,6 +1,6 @@
 #!/bin/bash
 #A script to enumerate local information from a Linux host
-v="version 0.8"
+version="version 0.9"
 #@rebootuser
 
 #help function
@@ -10,12 +10,13 @@ echo -e "\n\e[00;31m#########################################################\e[
 echo -e "\e[00;31m#\e[00m" "\e[00;33mLocal Linux Enumeration & Privilege Escalation Script\e[00m" "\e[00;31m#\e[00m"
 echo -e "\e[00;31m#########################################################\e[00m"
 echo -e "\e[00;33m# www.rebootuser.com | @rebootuser \e[00m"
-echo -e "\e[00;33m# $v\e[00m\n"
+echo -e "\e[00;33m# $version\e[00m\n"
 echo -e "\e[00;33m# Example: ./LinEnum.sh -k keyword -r report -e /tmp/ -t \e[00m\n"
 
 		echo "OPTIONS:"
 		echo "-k	Enter keyword"
 		echo "-e	Enter export location"
+		echo "-s 	Supply user password for sudo checks (INSECURE)"
 		echo "-t	Include thorough (lengthy) tests"
 		echo "-r	Enter report name" 
 		echo "-h	Displays this help text"
@@ -72,12 +73,23 @@ else
   :
 fi
 
+if [ "$sudopass" ]; then 
+  echo -e "\e[00;35m[+] Please enter password - INSECURE - really only for CTF use!\e[00m"
+  read -s userpassword
+  echo 
+else 
+  :
+fi
+
 who=`whoami` 2>/dev/null 
 echo -e "\n" 
 
 echo -e "\e[00;33mScan started at:"; date 
 echo -e "\e[00m\n" 
 }
+
+# useful binaries (thanks to https://gtfobins.github.io/)
+binarylist='nmap\|perl\|awk\|find\|bash\|sh\|man\|more\|less\|vi\|emacs\|vim\|nc\|netcat\|python\|ruby\|lua\|irb\|tar\|zip\|gdb\|pico\|scp\|git\|rvim\|script\|ash\|csh\|curl\|dash\|ed\|env\|expect\|ftp\|sftp\|node\|php\|rpm\|rpmquery\|socat\|strace\|taskset\|tclsh\|telnet\|tftp\|wget\|wish\|zsh\|ssh'
 
 system_info()
 {
@@ -253,7 +265,7 @@ else
 fi
 
 #can we sudo without supplying a password
-sudoperms=`echo '' | sudo -S -l 2>/dev/null`
+sudoperms=`echo '' | sudo -S -l -k 2>/dev/null`
 if [ "$sudoperms" ]; then
   echo -e "\e[00;33m[+] We can sudo without supplying a password!\e[00m\n$sudoperms" 
   echo -e "\n" 
@@ -261,8 +273,42 @@ else
   :
 fi
 
-#known 'good' breakout binaries
-sudopwnage=`echo '' | sudo -S -l 2>/dev/null | grep -w 'nmap\|perl\|'awk'\|'find'\|'bash'\|'sh'\|'man'\|'more'\|'less'\|'vi'\|'emacs'\|'vim'\|'nc'\|'netcat'\|python\|ruby\|lua\|irb\|tar\|zip\|gdb\|pico\|scp\|ssh\|git\|rvim\|script' | xargs -r ls -la 2>/dev/null`
+#check sudo perms - authenticated
+if [ "$sudopass" ]; then
+    if [ "$sudoperms" ]; then
+      :
+    else
+      sudoauth=`echo $userpassword | sudo -S -l -k 2>/dev/null`
+      if [ "$sudoauth" ]; then
+        echo -e "\e[00;33m[+] We can sudo when supplying a password!\e[00m\n$sudoauth" 
+        echo -e "\n" 
+      else 
+        :
+      fi
+    fi
+else
+  :
+fi
+
+##known 'good' breakout binaries (cleaned to parse /etc/sudoers for comma separated values) - authenticated
+if [ "$sudopass" ]; then
+    if [ "$sudoperms" ]; then
+      :
+    else
+      sudopermscheck=`echo $userpassword | sudo -S -l -k 2>/dev/null | xargs -n 1 2>/dev/null|sed 's/,*$//g' 2>/dev/null | grep -w $binarylist 2>/dev/null`
+      if [ "$sudopermscheck" ]; then
+        echo -e "\e[00;33m[-] Possible sudo pwnage!\e[00m\n$sudopermscheck" 
+        echo -e "\n" 
+     else 
+        :
+      fi
+    fi
+else
+  :
+fi
+
+#known 'good' breakout binaries (cleaned to parse /etc/sudoers for comma separated values)
+sudopwnage=`echo '' | sudo -S -l -k 2>/dev/null | xargs -n 1 2>/dev/null | sed 's/,*$//g' 2>/dev/null | grep -w $binarylist 2>/dev/null`
 if [ "$sudopwnage" ]; then
   echo -e "\e[00;33m[+] Possible sudo pwnage!\e[00m\n$sudopwnage" 
   echo -e "\n" 
@@ -912,14 +958,17 @@ else
     :
 fi
 
-#anything in the default http home dirs
-apachehomedirs=`ls -alhR /var/www/ 2>/dev/null; ls -alhR /srv/www/htdocs/ 2>/dev/null; ls -alhR /usr/local/www/apache2/data/ 2>/dev/null; ls -alhR /opt/lampp/htdocs/ 2>/dev/null`
-if [ "$apachehomedirs" ]; then
-  echo -e "\e[00;31m[-] www home dir contents:\e[00m\n$apachehomedirs" 
-  echo -e "\n" 
+#anything in the default http home dirs (changed to thorough as can be large)
+if [ "$thorough" = "1" ]; then
+  apachehomedirs=`ls -alhR /var/www/ 2>/dev/null; ls -alhR /srv/www/htdocs/ 2>/dev/null; ls -alhR /usr/local/www/apache2/data/ 2>/dev/null; ls -alhR /opt/lampp/htdocs/ 2>/dev/null`
+  if [ "$apachehomedirs" ]; then
+    echo -e "\e[00;31m[-] www home dir contents:\e[00m\n$apachehomedirs" 
+    echo -e "\n" 
 else 
-  :
+    :
+  fi
 fi
+
 }
 
 interesting_files()
@@ -969,7 +1018,7 @@ fi
 
 #list of 'interesting' suid files - feel free to make additions
 if [ "$thorough" = "1" ]; then
-intsuid=`find / -perm -4000 -type f 2>/dev/null | grep -w 'nmap\|perl\|'awk'\|'find'\|'bash'\|'sh'\|'man'\|'more'\|'less'\|'vi'\|'vim'\|'emacs'\|'nc'\|'netcat'\|python\|ruby\|lua\|irb\|pl' | xargs -r ls -la 2>/dev/null`
+intsuid=`find / -perm -4000 -type f -exec ls -la {} \; 2>/dev/null | grep -w $binarylist 2>/dev/null`
 	if [ "$intsuid" ]; then
 		echo -e "\e[00;33m[+] Possibly interesting SUID files:\e[00m\n$intsuid" 
 		echo -e "\n" 
@@ -1032,7 +1081,7 @@ fi
 
 #list of 'interesting' guid files - feel free to make additions
 if [ "$thorough" = "1" ]; then
-intguid=`find / -perm -2000 -type f 2>/dev/null | grep -w 'nmap\|perl\|'awk'\|'find'\|'bash'\|'sh'\|'man'\|'more'\|'less'\|'vi'\|'emacs'\|'vim'\|'nc'\|'netcat'\|python\|ruby\|lua\|irb\|pl' | xargs -r ls -la 2>/dev/null`
+intguid=`find / -perm -2000 -type f  -exec ls -la {} \; 2>/dev/null | grep -w $binarylist 2>/dev/null`
 	if [ "$intguid" ]; then
 		echo -e "\e[00;33m[+] Possibly interesting GUID files:\e[00m\n$intguid" 
 		echo -e "\n" 
@@ -1506,11 +1555,12 @@ call_each()
   footer
 }
 
-while getopts "h:k:r:e:t" option; do
+while getopts "h:k:r:e:st" option; do
  case "${option}" in
     k) keyword=${OPTARG};;
     r) report=${OPTARG}"-"`date +"%d-%m-%y"`;;
     e) export=${OPTARG};;
+    s) sudopass=1;;
     t) thorough=1;;
     h) usage; exit;;
     *) usage; exit;;
