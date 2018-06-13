@@ -848,7 +848,7 @@ else
   :
 fi
 
-systemdread=`ls -lthR /etc/init/ 2>/dev/null`
+systemdread=`ls -lthR /lib/systemd/ 2>/dev/null`
 if [ "$systemdread" ]; then
   echo -e "\e[00;31m[-] /lib/systemd/* config file permissions:\e[00m\n$systemdread"
 else
