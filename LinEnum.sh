@@ -831,6 +831,37 @@ if [ "$usrrcdperms" ]; then
 else 
   :
 fi
+
+initread=`ls -la /etc/init/ 2>/dev/null`
+if [ "$initread" ]; then
+  echo -e "\e[00;31m[-] /etc/init/ config file permissions:\e[00m\n$initread"
+  echo -e "\n"
+else
+  :
+fi
+
+# upstart scripts not belonging to root
+initperms=`find /etc/init \! -uid 0 -type f 2>/dev/null |xargs -r ls -la 2>/dev/null`
+if [ "$initperms" ]; then
+   echo -e "\e[00;31m[-] /etc/init/ config files not belonging to root:\e[00m\n$initperms"
+else
+  :
+fi
+
+systemdread=`ls -lthR /etc/init/ 2>/dev/null`
+if [ "$systemdread" ]; then
+  echo -e "\e[00;31m[-] /lib/systemd/* config file permissions:\e[00m\n$systemdread"
+else
+  :
+fi
+
+# systemd files not belonging to root
+systemdperms=`find /lib/systemd/ \! -uid 0 -type f 2>/dev/null |xargs -r ls -la 2>/dev/null`
+if [ "$systemdperms" ]; then
+   echo -e "\e[00;31m[-] /lib/systemd/* config files not belonging to root:\e[00m\n$systemdperms"
+else
+  :
+fi
 }
 
 software_configs()
