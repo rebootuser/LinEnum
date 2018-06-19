@@ -844,6 +844,7 @@ fi
 initperms=`find /etc/init \! -uid 0 -type f 2>/dev/null |xargs -r ls -la 2>/dev/null`
 if [ "$initperms" ]; then
    echo -e "\e[00;31m[-] /etc/init/ config files not belonging to root:\e[00m\n$initperms"
+   echo -e "\n" 
 else
   :
 fi
@@ -851,6 +852,7 @@ fi
 systemdread=`ls -lthR /lib/systemd/ 2>/dev/null`
 if [ "$systemdread" ]; then
   echo -e "\e[00;31m[-] /lib/systemd/* config file permissions:\e[00m\n$systemdread"
+  echo -e "\n" 
 else
   :
 fi
@@ -859,6 +861,7 @@ fi
 systemdperms=`find /lib/systemd/ \! -uid 0 -type f 2>/dev/null |xargs -r ls -la 2>/dev/null`
 if [ "$systemdperms" ]; then
    echo -e "\e[00;31m[-] /lib/systemd/* config files not belonging to root:\e[00m\n$systemdperms"
+   echo -e "\n" 
 else
   :
 fi
