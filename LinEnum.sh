@@ -1152,6 +1152,19 @@ wwguidrt=`find / -uid 0 -perm -2007 -type f -exec ls -la {} 2>/dev/null \;`
 	:
 fi
 
+#list all files with POSIX capabilities set along with there capabilities
+if [ "$thorough" = "1" ]; then
+fileswithcaps=`getcap -r / 2>/dev/null || /sbin/getcap -r / 2>/dev/null`
+	if [ "$fileswithcaps" ]; then
+		echo -e "\e[00;31m[+] Files with POSIX capabilities set:\e[00m\n$fileswithcaps"
+		echo -e "\n"
+	else
+		:
+	fi
+  else
+	  :
+fi
+
 #list all world-writable files excluding /proc and /sys
 if [ "$thorough" = "1" ]; then
 wwfiles=`find / ! -path "*/proc/*" ! -path "/sys/*" -perm -2 -type f -exec ls -la {} 2>/dev/null \;`
