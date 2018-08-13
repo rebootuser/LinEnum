@@ -97,3 +97,4 @@ High-level summary of the checks/tasks performed by LinEnum:
 * Platform/software specific tests:
   * Checks to determine if we're in a Docker container
   * Checks to see if the host has Docker installed
+  * Checks to determine if we're in an LXC container
