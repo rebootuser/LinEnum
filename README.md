@@ -87,6 +87,7 @@ High-level summary of the checks/tasks performed by LinEnum:
   * Locate all world-writable SUID/GUID files
   * Locate all SUID/GUID files owned by root
   * Locate ‘interesting’ SUID/GUID files (i.e. nmap, vim etc)
+  * Locate files with POSIX capabilities
   * List all world-writable files
   * Find/list all accessible *.plan files and display contents
   * Find/list all accessible *.rhosts files and display contents
