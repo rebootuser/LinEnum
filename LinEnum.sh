@@ -144,6 +144,15 @@ else
   :
 fi
 
+#current user capabilities
+usrcap=`capsh --print 2>/dev/null`
+if [ "$usrcap" ]; then
+  echo -e "\e[00;31m[-] Current user capabilities:\e[00m\n$usrcap" 
+  echo -e "\n" 
+else 
+  :
+fi
+
 #last logged on user information
 lastlogedonusrs=`lastlog 2>/dev/null |grep -v "Never" 2>/dev/null`
 if [ "$lastlogedonusrs" ]; then
@@ -1055,6 +1064,19 @@ if [ "$thorough" = "1" ]; then
 intsuid=`find / -perm -4000 -type f -exec ls -la {} \; 2>/dev/null | grep -w $binarylist 2>/dev/null`
 	if [ "$intsuid" ]; then
 		echo -e "\e[00;33m[+] Possibly interesting SUID files:\e[00m\n$intsuid" 
+		echo -e "\n" 
+	else 
+		:
+	fi
+  else
+	:
+fi
+
+#list of 'interesting' capabilities files - feel free to make additions
+if [ "$thorough" = "1" ]; then
+intcap=`getcap -r / 2>/dev/null`
+	if [ "$intcap" ]; then
+		echo -e "\e[00;33m[+] Possibly interesting capabilities files:\e[00m\n$intcap" 
 		echo -e "\n" 
 	else 
 		:
