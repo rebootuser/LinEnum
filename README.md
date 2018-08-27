@@ -87,6 +87,7 @@ High-level summary of the checks/tasks performed by LinEnum:
   * Locate all world-writable SUID/GUID files
   * Locate all SUID/GUID files owned by root
   * Locate ‘interesting’ SUID/GUID files (i.e. nmap, vim etc)
+  * Locate files with POSIX capabilities
   * List all world-writable files
   * Find/list all accessible *.plan files and display contents
   * Find/list all accessible *.rhosts files and display contents
@@ -97,3 +98,4 @@ High-level summary of the checks/tasks performed by LinEnum:
 * Platform/software specific tests:
   * Checks to determine if we're in a Docker container
   * Checks to see if the host has Docker installed
+  * Checks to determine if we're in an LXC container
