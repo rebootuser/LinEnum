@@ -586,6 +586,24 @@ else
   :
 fi
 
+# list systemd timers
+if [ "$thorough" = "1" ]; then
+  # include inactive timers in thorough mode
+  systemdtimers="$(systemctl list-timers --all 2>/dev/null)"
+  info=""
+else
+  systemdtimers="$(systemctl list-timers 2>/dev/null |head -n -1 2>/dev/null)"
+  # replace the info in the output with a hint towards thorough mode
+  info="\e[2mEnable thorough tests to see inactive timers\e[00m"
+fi
+if [ "$systemdtimers" ]; then
+  echo -e "\e[00;31m[-] Systemd timers:\e[00m\n$systemdtimers\n$info"
+  echo -e "\n"
+else
+  :
+fi
+
+
 }
 networking_info()
 {

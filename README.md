@@ -64,6 +64,7 @@ High-level summary of the checks/tasks performed by LinEnum:
   * List all cron jobs
   * Locate all world-writable cron jobs
   * Locate cron jobs owned by other users of the system
+  * List the active and inactive systemd timers
 * Services:
   * List network connections (TCP & UDP)
   * List running processes
