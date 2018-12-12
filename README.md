@@ -5,7 +5,7 @@ Note: Export functionality is currently in the experimental stage.
 
 General usage:
 
-version 0.92
+version 0.93
 
 * Example: ./LinEnum.sh -s -k keyword -r report -e /tmp/ -t 
 
@@ -64,6 +64,7 @@ High-level summary of the checks/tasks performed by LinEnum:
   * List all cron jobs
   * Locate all world-writable cron jobs
   * Locate cron jobs owned by other users of the system
+  * List the active and inactive systemd timers
 * Services:
   * List network connections (TCP & UDP)
   * List running processes
