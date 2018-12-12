@@ -477,8 +477,6 @@ fi
 if [ "$systemdtimers" ]; then
   echo -e "\e[00;31m[-] Systemd timers:\e[00m\n$systemdtimers\n$info"
   echo -e "\n"
-else
-  :
 fi
 
 
