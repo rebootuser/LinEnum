@@ -1,6 +1,6 @@
 #!/bin/bash
 #A script to enumerate local information from a Linux host
-version="version 0.94"
+version="version 0.95"
 #@rebootuser
 
 #help function
@@ -54,7 +54,7 @@ fi
 if [ "$thorough" ]; then 
 	echo "[+] Thorough tests = Enabled" 
 else 
-	echo -e "\e[00;33m[+] Thorough tests = Disabled (SUID/GUID checks will not be perfomed!)\e[00m" 
+	echo -e "\e[00;33m[+] Thorough tests = Disabled\e[00m" 
 fi
 
 sleep 2
@@ -79,7 +79,7 @@ echo -e "\e[00m\n"
 }
 
 # useful binaries (thanks to https://gtfobins.github.io/)
-binarylist='nmap\|perl\|awk\|find\|bash\|sh\|man\|more\|less\|vi\|emacs\|vim\|nc\|netcat\|python\|ruby\|lua\|irb\|tar\|zip\|gdb\|pico\|scp\|git\|rvim\|script\|ash\|csh\|curl\|dash\|ed\|env\|expect\|ftp\|sftp\|node\|php\|rpm\|rpmquery\|socat\|strace\|taskset\|tclsh\|telnet\|tftp\|wget\|wish\|zsh\|ssh'
+binarylist='nmap\|perl\|awk\|find\|bash\|sh\|man\|more\|less\|vi\|emacs\|vim\|nc\|netcat\|python\|ruby\|lua\|irb\|tar\|zip\|gdb\|pico\|scp\|git\|rvim\|script\|ash\|csh\|curl\|dash\|ed\|env\|expect\|ftp\|sftp\|node\|php\|rpm\|rpmquery\|socat\|strace\|taskset\|tclsh\|telnet\|tftp\|wget\|wish\|zsh\|ssh$\|ip$\|arp\|mtr'
 
 system_info()
 {
@@ -131,7 +131,6 @@ if [ "$lastlogedonusrs" ]; then
   echo -e "\n" 
 fi
 
-
 #who else is logged on
 loggedonusrs=`w 2>/dev/null`
 if [ "$loggedonusrs" ]; then
@@ -160,7 +159,7 @@ if [ "$hashesinpasswd" ]; then
   echo -e "\e[00;33m[+] It looks like we have password hashes in /etc/passwd!\e[00m\n$hashesinpasswd" 
   echo -e "\n"
 fi
- 
+
 #contents of /etc/passwd
 readpasswd=`cat /etc/passwd 2>/dev/null`
 if [ "$readpasswd" ]; then
@@ -479,8 +478,8 @@ if [ "$systemdtimers" ]; then
   echo -e "\n"
 fi
 
-
 }
+
 networking_info()
 {
 echo -e "\e[00;33m### NETWORKING  ##########################################\e[00m" 
@@ -550,6 +549,7 @@ if [ ! "$tcpservs" ] && [ "$tcpservsip" ]; then
   echo -e "\e[00;31m[-] Listening TCP:\e[00m\n$tcpservsip" 
   echo -e "\n"
 fi
+
 #listening UDP
 udpservs=`netstat -anup 2>/dev/null`
 if [ "$udpservs" ]; then
@@ -635,7 +635,7 @@ initdread=`ls -la /etc/init.d 2>/dev/null`
 if [ "$initdread" ]; then
   echo -e "\e[00;31m[-] /etc/init.d/ binary permissions:\e[00m\n$initdread" 
   echo -e "\n"
-fi  
+fi
 
 #init.d files NOT belonging to root!
 initdperms=`find /etc/init.d/ \! -uid 0 -type f 2>/dev/null |xargs -r ls -la 2>/dev/null`
@@ -692,7 +692,7 @@ fi
 # systemd files not belonging to root
 systemdperms=`find /lib/systemd/ \! -uid 0 -type f 2>/dev/null |xargs -r ls -la 2>/dev/null`
 if [ "$systemdperms" ]; then
-   echo -e "\e[00;31m[-] /lib/systemd/* config files not belonging to root:\e[00m\n$systemdperms"
+   echo -e "\e[00;33m[+] /lib/systemd/* config files not belonging to root:\e[00m\n$systemdperms"
    echo -e "\n"
 fi
 }
@@ -794,7 +794,7 @@ if [ "$htpasswd" ]; then
     echo -e "\n"
 fi
 
-#anything in the default http home dirs (changed to thorough as can be large)
+#anything in the default http home dirs (a thorough only check as output can be large)
 if [ "$thorough" = "1" ]; then
   apachehomedirs=`ls -alhR /var/www/ 2>/dev/null; ls -alhR /srv/www/htdocs/ 2>/dev/null; ls -alhR /usr/local/www/apache2/data/ 2>/dev/null; ls -alhR /opt/lampp/htdocs/ 2>/dev/null`
   if [ "$apachehomedirs" ]; then
@@ -824,118 +824,92 @@ fi
 echo -e "\e[00;31m[-] Can we read/write sensitive files:\e[00m" ; ls -la /etc/passwd 2>/dev/null ; ls -la /etc/group 2>/dev/null ; ls -la /etc/profile 2>/dev/null; ls -la /etc/shadow 2>/dev/null ; ls -la /etc/master.passwd 2>/dev/null 
 echo -e "\n" 
 
-#search for suid files - this can take some time so is only 'activated' with thorough scanning switch (as are all suid scans below)
-if [ "$thorough" = "1" ]; then
+#search for suid files
 findsuid=`find / -perm -4000 -type f -exec ls -la {} 2>/dev/null \;`
-	if [ "$findsuid" ]; then
-		echo -e "\e[00;31m[-] SUID files:\e[00m\n$findsuid" 
-		echo -e "\n"
-	fi
+if [ "$findsuid" ]; then
+  echo -e "\e[00;31m[-] SUID files:\e[00m\n$findsuid" 
+  echo -e "\n"
 fi
 
-if [ "$thorough" = "1" ]; then
-	if [ "$export" ] && [ "$findsuid" ]; then
-		mkdir $format/suid-files/ 2>/dev/null
-		for i in $findsuid; do cp $i $format/suid-files/; done 2>/dev/null
-	fi
+if [ "$export" ] && [ "$findsuid" ]; then
+  mkdir $format/suid-files/ 2>/dev/null
+  for i in $findsuid; do cp $i $format/suid-files/; done 2>/dev/null
 fi
 
 #list of 'interesting' suid files - feel free to make additions
-if [ "$thorough" = "1" ]; then
 intsuid=`find / -perm -4000 -type f -exec ls -la {} \; 2>/dev/null | grep -w $binarylist 2>/dev/null`
-	if [ "$intsuid" ]; then
-		echo -e "\e[00;33m[+] Possibly interesting SUID files:\e[00m\n$intsuid" 
-		echo -e "\n"
-	fi
+if [ "$intsuid" ]; then
+  echo -e "\e[00;33m[+] Possibly interesting SUID files:\e[00m\n$intsuid" 
+  echo -e "\n"
 fi
 
 #lists word-writable suid files
-if [ "$thorough" = "1" ]; then
 wwsuid=`find / -perm -4007 -type f -exec ls -la {} 2>/dev/null \;`
-	if [ "$wwsuid" ]; then
-		echo -e "\e[00;33m[+] World-writable SUID files:\e[00m\n$wwsuid" 
-		echo -e "\n"
-	fi
+if [ "$wwsuid" ]; then
+  echo -e "\e[00;33m[+] World-writable SUID files:\e[00m\n$wwsuid" 
+  echo -e "\n"
 fi
 
 #lists world-writable suid files owned by root
-if [ "$thorough" = "1" ]; then
 wwsuidrt=`find / -uid 0 -perm -4007 -type f -exec ls -la {} 2>/dev/null \;`
-	if [ "$wwsuidrt" ]; then
-		echo -e "\e[00;33m[+] World-writable SUID files owned by root:\e[00m\n$wwsuidrt" 
-		echo -e "\n"
-	fi
+if [ "$wwsuidrt" ]; then
+  echo -e "\e[00;33m[+] World-writable SUID files owned by root:\e[00m\n$wwsuidrt" 
+  echo -e "\n"
 fi
 
-#search for guid files - this can take some time so is only 'activated' with thorough scanning switch (as are all guid scans below)
-if [ "$thorough" = "1" ]; then
-findguid=`find / -perm -2000 -type f -exec ls -la {} 2>/dev/null \;`
-	if [ "$findguid" ]; then
-		echo -e "\e[00;31m[-] GUID files:\e[00m\n$findguid" 
-		echo -e "\n"
-	fi
+#search for sgid files
+findsgid=`find / -perm -2000 -type f -exec ls -la {} 2>/dev/null \;`
+if [ "$findsgid" ]; then
+  echo -e "\e[00;31m[-] SGID files:\e[00m\n$findsgid" 
+  echo -e "\n"
 fi
 
-if [ "$thorough" = "1" ]; then
-	if [ "$export" ] && [ "$findguid" ]; then
-		mkdir $format/guid-files/ 2>/dev/null
-		for i in $findguid; do cp $i $format/guid-files/; done 2>/dev/null
-	fi
+if [ "$export" ] && [ "$findsgid" ]; then
+  mkdir $format/sgid-files/ 2>/dev/null
+  for i in $findsgid; do cp $i $format/sgid-files/; done 2>/dev/null
 fi
 
-#list of 'interesting' guid files - feel free to make additions
-if [ "$thorough" = "1" ]; then
-intguid=`find / -perm -2000 -type f  -exec ls -la {} \; 2>/dev/null | grep -w $binarylist 2>/dev/null`
-	if [ "$intguid" ]; then
-		echo -e "\e[00;33m[+] Possibly interesting GUID files:\e[00m\n$intguid" 
-		echo -e "\n"
-	fi
+#list of 'interesting' sgid files
+intsgid=`find / -perm -2000 -type f  -exec ls -la {} \; 2>/dev/null | grep -w $binarylist 2>/dev/null`
+if [ "$intsgid" ]; then
+  echo -e "\e[00;33m[+] Possibly interesting SGID files:\e[00m\n$intsgid" 
+  echo -e "\n"
 fi
 
-#lists world-writable guid files
-if [ "$thorough" = "1" ]; then
-wwguid=`find / -perm -2007 -type f -exec ls -la {} 2>/dev/null \;`
-	if [ "$wwguid" ]; then
-		echo -e "\e[00;33m[+] World-writable GUID files:\e[00m\n$wwguid" 
-		echo -e "\n"
-	fi
+#lists world-writable sgid files
+wwsgid=`find / -perm -2007 -type f -exec ls -la {} 2>/dev/null \;`
+if [ "$wwsgid" ]; then
+  echo -e "\e[00;33m[+] World-writable SGID files:\e[00m\n$wwsgid" 
+  echo -e "\n"
 fi
 
-#lists world-writable guid files owned by root
-if [ "$thorough" = "1" ]; then
-wwguidrt=`find / -uid 0 -perm -2007 -type f -exec ls -la {} 2>/dev/null \;`
-	if [ "$wwguidrt" ]; then
-		echo -e "\e[00;33m[+] World-writable GUID files owned by root:\e[00m\n$wwguidrt" 
-		echo -e "\n"
-	fi
+#lists world-writable sgid files owned by root
+wwsgidrt=`find / -uid 0 -perm -2007 -type f -exec ls -la {} 2>/dev/null \;`
+if [ "$wwsgidrt" ]; then
+  echo -e "\e[00;33m[+] World-writable SGID files owned by root:\e[00m\n$wwsgidrt" 
+  echo -e "\n"
 fi
 
 #list all files with POSIX capabilities set along with there capabilities
-if [ "$thorough" = "1" ]; then
 fileswithcaps=`getcap -r / 2>/dev/null || /sbin/getcap -r / 2>/dev/null`
-	if [ "$fileswithcaps" ]; then
-		echo -e "\e[00;31m[+] Files with POSIX capabilities set:\e[00m\n$fileswithcaps"
-		echo -e "\n"
-	fi
+if [ "$fileswithcaps" ]; then
+  echo -e "\e[00;31m[+] Files with POSIX capabilities set:\e[00m\n$fileswithcaps"
+  echo -e "\n"
 fi
 
-if [ "$thorough" = "1" ]; then
-	if [ "$export" ] && [ "$fileswithcaps" ]; then
-		mkdir $format/files_with_capabilities/ 2>/dev/null
-		for i in $fileswithcaps; do cp $i $format/files_with_capabilities/; done 2>/dev/null
-	fi
+if [ "$export" ] && [ "$fileswithcaps" ]; then
+  mkdir $format/files_with_capabilities/ 2>/dev/null
+  for i in $fileswithcaps; do cp $i $format/files_with_capabilities/; done 2>/dev/null
 fi
 
 #searches /etc/security/capability.conf for users associated capapilies
-if [ "$thorough" = "1" ]; then
 userswithcaps=`grep -v '^#\|none\|^$' /etc/security/capability.conf 2>/dev/null`
-	if [ "$userswithcaps" ]; then
-		echo -e "\e[00;33m[+] Users with specific POSIX capabilities:\e[00m\n$userswithcaps"
-		echo -e "\n"
-	fi
+if [ "$userswithcaps" ]; then
+  echo -e "\e[00;33m[+] Users with specific POSIX capabilities:\e[00m\n$userswithcaps"
+  echo -e "\n"
 fi
 
-if [ "$thorough" = "1" ] && [ "$userswithcaps" ] ; then
+if [ "$userswithcaps" ] ; then
 #matches the capabilities found associated with users with the current user
 matchedcaps=`echo -e "$userswithcaps" | grep \`whoami\` | awk '{print $1}' 2>/dev/null`
 	if [ "$matchedcaps" ]; then
@@ -959,6 +933,33 @@ matchedcaps=`echo -e "$userswithcaps" | grep \`whoami\` | awk '{print $1}' 2>/de
 				fi
 			fi
 		fi
+	fi
+fi
+
+#look for private keys - thanks djhohnstein
+if [ "$thorough" = "1" ]; then
+privatekeyfiles=`grep -rl "PRIVATE KEY-----" /home 2>/dev/null`
+	if [ "$privatekeyfiles" ]; then
+  		echo -e "\e[00;33m[+] Private SSH keys found!:\e[00m\n$privatekeyfiles"
+  		echo -e "\n"
+	fi
+fi
+
+#look for AWS keys - thanks djhohnstein
+if [ "$thorough" = "1" ]; then
+awskeyfiles=`grep -rli "aws_secret_access_key" /home 2>/dev/null`
+	if [ "$awskeyfiles" ]; then
+  		echo -e "\e[00;33m[+] AWS secret keys found!:\e[00m\n$awskeyfiles"
+  		echo -e "\n"
+	fi
+fi
+
+#look for git credential files - thanks djhohnstein
+if [ "$thorough" = "1" ]; then
+gitcredfiles=`find / -name ".git-credentials" 2>/dev/null`
+	if [ "$gitcredfiles" ]; then
+  		echo -e "\e[00;33m[+] Git credentials saved on the machine!:\e[00m\n$gitcredfiles"
+  		echo -e "\n"
 	fi
 fi
 
@@ -1246,6 +1247,7 @@ fi
 
 docker_checks()
 {
+
 #specific checks - check to see if we're in a docker container
 dockercontainer=` grep -i docker /proc/self/cgroup  2>/dev/null; find / -name "*dockerenv*" -exec ls -la {} \; 2>/dev/null`
 if [ "$dockercontainer" ]; then
@@ -1284,6 +1286,7 @@ fi
 
 lxc_container_checks()
 {
+
 #specific checks - are we in an lxd/lxc container
 lxccontainer=`grep -qa container=lxc /proc/1/environ 2>/dev/null`
 if [ "$lxccontainer" ]; then

@@ -2,9 +2,21 @@
 
 Note: Export functionality is currently in the experimental stage.
 
+## V0.95 (release 24-01-2019)
+Additions
+* Additional checks provided by @djhohnstein (https://github.com/djhohnstein/LinEnum/commit/bf4ce1ad3beb392cab5d388e364972373533c721#diff-679e8fbdcfe07231f5eda7a8b491511dR1350)
+* Searches /home for private key files
+* Searches /home for AWS keys
+* Searches / for git credential files 
+
+Modifications
+* SUID/SGID and capabilities checks moved from thorough to standard check
+* False positive ssh-agent fix 
+* Output text/small code changes and clean-up
+
 ## V0.9 (release 25-05-2018)
 Additions
-* Sudo/suid/guid binary list expanded to include entries from https://gtfobins.github.io/
+* Sudo/SUID/SGID binary list expanded to include entries from https://gtfobins.github.io/
 * -s switch introduced. This allows you to supply the current user password for authenticated sudo 'checks'. Note; this is INSECURE and is really only for use in CTF environments
 
 Modifications
