@@ -6,3 +6,4 @@ Following People have contributed to various features (list in no particular ord
 * @anantshri (http://anantshri.info) : code optimization, loaded kernel modules listing
 * @gedigi : fixed incorrect sudo NOPASSWD check
 * https://github.com/d78ui98 : code optimization
+* https://github.com/djhohnstein : added checks for private keys, AWS keys and git credential files
