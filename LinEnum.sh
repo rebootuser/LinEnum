@@ -1,6 +1,6 @@
 #!/bin/bash
 #A script to enumerate local information from a Linux host
-version="version 0.96"
+version="version 0.97"
 #@rebootuser
 
 #help function
@@ -19,6 +19,7 @@ echo -e "\e[00;33m# Example: ./LinEnum.sh -k keyword -r report -e /tmp/ -t \e[00
 		echo "-s 	Supply user password for sudo checks (INSECURE)"
 		echo "-t	Include thorough (lengthy) tests"
 		echo "-r	Enter report name" 
+		echo "-n	Sort files by date modified when applicable"
 		echo "-h	Displays this help text"
 		echo -e "\n"
 		echo "Running with no options = limited scans/no output file"
@@ -55,6 +56,30 @@ if [ "$thorough" ]; then
 	echo "[+] Thorough tests = Enabled" 
 else 
 	echo -e "\e[00;33m[+] Thorough tests = Disabled\e[00m" 
+fi
+
+ls_sort_flags=""
+find_sort_printf=""
+find_sort_pipe_command="cat -"
+
+find_sort_pipe_function() {
+  eval "${find_sort_pipe_command}" # Execute either cat or sorting the results
+}
+
+if [ "$sort" ]; then
+  ls_sort_flags="-tr"
+  find_sort_printf="-printf %T@:" # Use colon for awk delimiter
+  find_sort_pipe_command="sort -n -k 1 | awk -F: '{\$1=\"\"; print substr(\$0,2)}'"
+
+  echo "[+] Date modified sort = Enabled"
+
+  if [ "$(readlink $(which find))" = "/bin/busybox" ]; then # Busybox based systems don't support -printf
+    find_sort_printf=""
+    find_sort_pipe_command="cat -"
+    echo -e "\e[00;33m[+] Disabling sort for find commands because busybox system detected\e[00m"
+  fi
+else
+	echo -e "\e[00;33m[+] Date modified sort = Disabled\e[00m"
 fi
 
 sleep 2
@@ -256,21 +281,21 @@ if [ "$sudopwnage" ]; then
 fi
 
 #who has sudoed in the past
-whohasbeensudo=`find /home -name .sudo_as_admin_successful 2>/dev/null`
+whohasbeensudo=`find /home -name .sudo_as_admin_successful ${find_sort_printf} -exec ls -la '{}' \; 2>/dev/null | find_sort_pipe_function`
 if [ "$whohasbeensudo" ]; then
   echo -e "\e[00;31m[-] Accounts that have recently used sudo:\e[00m\n$whohasbeensudo" 
   echo -e "\n"
 fi
 
 #checks to see if roots home directory is accessible
-rthmdir=`ls -ahl /root/ 2>/dev/null`
+rthmdir=`ls -ahl "${ls_sort_flags}" /root/ 2>/dev/null`
 if [ "$rthmdir" ]; then
   echo -e "\e[00;33m[+] We can read root's home directory!\e[00m\n$rthmdir" 
   echo -e "\n"
 fi
 
 #displays /home directory permissions - check if any are lax
-homedirperms=`ls -ahl /home/ 2>/dev/null`
+homedirperms=`ls -ahl "${ls_sort_flags}" /home/ 2>/dev/null`
 if [ "$homedirperms" ]; then
   echo -e "\e[00;31m[-] Are permissions on /home directories lax:\e[00m\n$homedirperms" 
   echo -e "\n"
@@ -278,7 +303,7 @@ fi
 
 #looks for files we can write to that don't belong to us
 if [ "$thorough" = "1" ]; then
-  grfilesall=`find / -writable ! -user \`whoami\` -type f ! -path "/proc/*" ! -path "/sys/*" -exec ls -al {} \; 2>/dev/null`
+  grfilesall=`find / -writable ! -user \`whoami\` -type f ! -path "/proc/*" ! -path "/sys/*" ${find_sort_printf} -exec ls -al {} \; 2>/dev/null | find_sort_pipe_function`
   if [ "$grfilesall" ]; then
     echo -e "\e[00;31m[-] Files not owned by user but writable by group:\e[00m\n$grfilesall" 
     echo -e "\n"
@@ -287,7 +312,7 @@ fi
 
 #looks for files that belong to us
 if [ "$thorough" = "1" ]; then
-  ourfilesall=`find / -user \`whoami\` -type f ! -path "/proc/*" ! -path "/sys/*" -exec ls -al {} \; 2>/dev/null`
+  ourfilesall=`find / -user \`whoami\` -type f ! -path "/proc/*" ! -path "/sys/*" ${find_sort_printf} -exec ls -al {} \; 2>/dev/null | find_sort_pipe_function`
   if [ "$ourfilesall" ]; then
     echo -e "\e[00;31m[-] Files owned by our user:\e[00m\n$ourfilesall"
     echo -e "\n"
@@ -296,7 +321,7 @@ fi
 
 #looks for hidden files
 if [ "$thorough" = "1" ]; then
-  hiddenfiles=`find / -name ".*" -type f ! -path "/proc/*" ! -path "/sys/*" -exec ls -al {} \; 2>/dev/null`
+  hiddenfiles=`find / -name ".*" -type f ! -path "/proc/*" ! -path "/sys/*" ${find_sort_printf} -exec ls -al {} \; 2>/dev/null | find_sort_pipe_function`
   if [ "$hiddenfiles" ]; then
     echo -e "\e[00;31m[-] Hidden files:\e[00m\n$hiddenfiles"
     echo -e "\n"
@@ -305,7 +330,7 @@ fi
 
 #looks for world-reabable files within /home - depending on number of /home dirs & files, this can take some time so is only 'activated' with thorough scanning switch
 if [ "$thorough" = "1" ]; then
-wrfileshm=`find /home/ -perm -4 -type f -exec ls -al {} \; 2>/dev/null`
+wrfileshm=`find /home/ -perm -4 -type f ${find_sort_printf} -exec ls -al {} \; 2>/dev/null | find_sort_pipe_function`
 	if [ "$wrfileshm" ]; then
 		echo -e "\e[00;31m[-] World-readable files within /home:\e[00m\n$wrfileshm" 
 		echo -e "\n"
@@ -330,7 +355,7 @@ fi
 
 #checks for if various ssh files are accessible - this can take some time so is only 'activated' with thorough scanning switch
 if [ "$thorough" = "1" ]; then
-sshfiles=`find / \( -name "id_dsa*" -o -name "id_rsa*" -o -name "known_hosts" -o -name "authorized_hosts" -o -name "authorized_keys" \) -exec ls -la {} 2>/dev/null \;`
+sshfiles=`find / \( -name "id_dsa*" -o -name "id_rsa*" -o -name "known_hosts" -o -name "authorized_hosts" -o -name "authorized_keys" \) ${find_sort_printf} -exec ls -la {} 2>/dev/null \; | find_sort_pipe_function`
 	if [ "$sshfiles" ]; then
 		echo -e "\e[00;31m[-] SSH keys/host information found in the following locations:\e[00m\n$sshfiles" 
 		echo -e "\n"
@@ -418,14 +443,14 @@ job_info()
 echo -e "\e[00;33m### JOBS/TASKS ##########################################\e[00m" 
 
 #are there any cron jobs configured
-cronjobs=`ls -la /etc/cron* 2>/dev/null`
+cronjobs=`ls -la "${ls_sort_flags}" /etc/cron* 2>/dev/null`
 if [ "$cronjobs" ]; then
   echo -e "\e[00;31m[-] Cron jobs:\e[00m\n$cronjobs" 
   echo -e "\n"
 fi
 
 #can we manipulate these jobs in any way
-cronjobwwperms=`find /etc/cron* -perm -0002 -type f -exec ls -la {} \; -exec cat {} 2>/dev/null \;`
+cronjobwwperms=`find /etc/cron* -perm -0002 -type f ${find_sort_printf} -exec ls -la {} \; -exec cat {} 2>/dev/null \; | find_sort_pipe_function`
 if [ "$cronjobwwperms" ]; then
   echo -e "\e[00;33m[+] World-writable cron jobs and file contents:\e[00m\n$cronjobwwperms" 
   echo -e "\n"
@@ -438,7 +463,7 @@ if [ "$crontabvalue" ]; then
   echo -e "\n"
 fi
 
-crontabvar=`ls -la /var/spool/cron/crontabs 2>/dev/null`
+crontabvar=`ls -la "${ls_sort_flags}" /var/spool/cron/crontabs 2>/dev/null`
 if [ "$crontabvar" ]; then
   echo -e "\e[00;31m[-] Anything interesting in /var/spool/cron/crontabs:\e[00m\n$crontabvar" 
   echo -e "\n"
@@ -450,7 +475,7 @@ if [ "$anacronjobs" ]; then
   echo -e "\n"
 fi
 
-anacrontab=`ls -la /var/spool/anacron 2>/dev/null`
+anacrontab=`ls -la "${ls_sort_flags}" /var/spool/anacron 2>/dev/null`
 if [ "$anacrontab" ]; then
   echo -e "\e[00;31m[-] When were jobs last executed (/var/spool/anacron contents):\e[00m\n$anacrontab" 
   echo -e "\n"
@@ -620,7 +645,7 @@ fi
 
 xinetdincd=`grep "/etc/xinetd.d" /etc/xinetd.conf 2>/dev/null`
 if [ "$xinetdincd" ]; then
-  echo -e "\e[00;31m[-] /etc/xinetd.d is included in /etc/xinetd.conf - associated binary permissions are listed below:\e[00m"; ls -la /etc/xinetd.d 2>/dev/null 
+  echo -e "\e[00;31m[-] /etc/xinetd.d is included in /etc/xinetd.conf - associated binary permissions are listed below:\e[00m"; ls -la "${ls_sort_flags}" /etc/xinetd.d 2>/dev/null 
   echo -e "\n"
 fi
 
@@ -631,66 +656,66 @@ if [ "$xinetdbinperms" ]; then
   echo -e "\n"
 fi
 
-initdread=`ls -la /etc/init.d 2>/dev/null`
+initdread=`ls -la "${ls_sort_flags}" /etc/init.d 2>/dev/null`
 if [ "$initdread" ]; then
   echo -e "\e[00;31m[-] /etc/init.d/ binary permissions:\e[00m\n$initdread" 
   echo -e "\n"
 fi
 
 #init.d files NOT belonging to root!
-initdperms=`find /etc/init.d/ \! -uid 0 -type f 2>/dev/null |xargs -r ls -la 2>/dev/null`
+initdperms=`find /etc/init.d/ \! -uid 0 -type f ${find_sort_printf} -exec ls -la {} 2>/dev/null \; | find_sort_pipe_function`
 if [ "$initdperms" ]; then
   echo -e "\e[00;31m[-] /etc/init.d/ files not belonging to root:\e[00m\n$initdperms" 
   echo -e "\n"
 fi
 
-rcdread=`ls -la /etc/rc.d/init.d 2>/dev/null`
+rcdread=`ls -la "${ls_sort_flags}" /etc/rc.d/init.d 2>/dev/null`
 if [ "$rcdread" ]; then
   echo -e "\e[00;31m[-] /etc/rc.d/init.d binary permissions:\e[00m\n$rcdread" 
   echo -e "\n"
 fi
 
 #init.d files NOT belonging to root!
-rcdperms=`find /etc/rc.d/init.d \! -uid 0 -type f 2>/dev/null |xargs -r ls -la 2>/dev/null`
+rcdperms=`find /etc/rc.d/init.d \! -uid 0 -type f ${find_sort_printf} -exec ls -la {} 2>/dev/null \; | find_sort_pipe_function`
 if [ "$rcdperms" ]; then
   echo -e "\e[00;31m[-] /etc/rc.d/init.d files not belonging to root:\e[00m\n$rcdperms" 
   echo -e "\n"
 fi
 
-usrrcdread=`ls -la /usr/local/etc/rc.d 2>/dev/null`
+usrrcdread=`ls -la "${ls_sort_flags}" /usr/local/etc/rc.d 2>/dev/null`
 if [ "$usrrcdread" ]; then
   echo -e "\e[00;31m[-] /usr/local/etc/rc.d binary permissions:\e[00m\n$usrrcdread" 
   echo -e "\n"
 fi
 
 #rc.d files NOT belonging to root!
-usrrcdperms=`find /usr/local/etc/rc.d \! -uid 0 -type f 2>/dev/null |xargs -r ls -la 2>/dev/null`
+usrrcdperms=`find /usr/local/etc/rc.d \! -uid 0 -type f ${find_sort_printf} -exec ls -la {} 2>/dev/null \; | find_sort_pipe_function`
 if [ "$usrrcdperms" ]; then
   echo -e "\e[00;31m[-] /usr/local/etc/rc.d files not belonging to root:\e[00m\n$usrrcdperms" 
   echo -e "\n"
 fi
 
-initread=`ls -la /etc/init/ 2>/dev/null`
+initread=`ls -la "${ls_sort_flags}" /etc/init/ 2>/dev/null`
 if [ "$initread" ]; then
   echo -e "\e[00;31m[-] /etc/init/ config file permissions:\e[00m\n$initread"
   echo -e "\n"
 fi
 
 # upstart scripts not belonging to root
-initperms=`find /etc/init \! -uid 0 -type f 2>/dev/null |xargs -r ls -la 2>/dev/null`
+initperms=`find /etc/init \! -uid 0 -type f ${find_sort_printf} -exec ls -la {} 2>/dev/null \; | find_sort_pipe_function`
 if [ "$initperms" ]; then
    echo -e "\e[00;31m[-] /etc/init/ config files not belonging to root:\e[00m\n$initperms"
    echo -e "\n"
 fi
 
-systemdread=`ls -lthR /lib/systemd/ 2>/dev/null`
+systemdread=`ls -lthR "${ls_sort_flags}" /lib/systemd/ 2>/dev/null`
 if [ "$systemdread" ]; then
   echo -e "\e[00;31m[-] /lib/systemd/* config file permissions:\e[00m\n$systemdread"
   echo -e "\n"
 fi
 
 # systemd files not belonging to root
-systemdperms=`find /lib/systemd/ \! -uid 0 -type f 2>/dev/null |xargs -r ls -la 2>/dev/null`
+systemdperms=`find /lib/systemd/ \! -uid 0 -type f ${find_sort_printf} -exec ls -la {} 2>/dev/null \; | find_sort_pipe_function`
 if [ "$systemdperms" ]; then
    echo -e "\e[00;33m[+] /lib/systemd/* config files not belonging to root:\e[00m\n$systemdperms"
    echo -e "\n"
@@ -796,7 +821,7 @@ fi
 
 #anything in the default http home dirs (a thorough only check as output can be large)
 if [ "$thorough" = "1" ]; then
-  apachehomedirs=`ls -alhR /var/www/ 2>/dev/null; ls -alhR /srv/www/htdocs/ 2>/dev/null; ls -alhR /usr/local/www/apache2/data/ 2>/dev/null; ls -alhR /opt/lampp/htdocs/ 2>/dev/null`
+  apachehomedirs=`ls -alhR "${ls_sort_flags}" /var/www/ 2>/dev/null; ls -alhR "${ls_sort_flags}" /srv/www/htdocs/ 2>/dev/null; ls -alhR "${ls_sort_flags}" /usr/local/www/apache2/data/ 2>/dev/null; ls -alhR "${ls_sort_flags}" /opt/lampp/htdocs/ 2>/dev/null`
   if [ "$apachehomedirs" ]; then
     echo -e "\e[00;31m[-] www home dir contents:\e[00m\n$apachehomedirs" 
     echo -e "\n"
@@ -825,7 +850,7 @@ echo -e "\e[00;31m[-] Can we read/write sensitive files:\e[00m" ; ls -la /etc/pa
 echo -e "\n" 
 
 #search for suid files
-findsuid=`find / -perm -4000 -type f -exec ls -la {} 2>/dev/null \;`
+findsuid=`find / -perm -4000 -type f ${find_sort_printf} -exec ls -la {} 2>/dev/null \; | find_sort_pipe_function`
 if [ "$findsuid" ]; then
   echo -e "\e[00;31m[-] SUID files:\e[00m\n$findsuid" 
   echo -e "\n"
@@ -837,28 +862,28 @@ if [ "$export" ] && [ "$findsuid" ]; then
 fi
 
 #list of 'interesting' suid files - feel free to make additions
-intsuid=`find / -perm -4000 -type f -exec ls -la {} \; 2>/dev/null | grep -w $binarylist 2>/dev/null`
+intsuid=`find / -perm -4000 -type f ${find_sort_printf} -exec ls -la {} \; 2>/dev/null | find_sort_pipe_function | grep -w $binarylist 2>/dev/null`
 if [ "$intsuid" ]; then
   echo -e "\e[00;33m[+] Possibly interesting SUID files:\e[00m\n$intsuid" 
   echo -e "\n"
 fi
 
 #lists word-writable suid files
-wwsuid=`find / -perm -4002 -type f -exec ls -la {} 2>/dev/null \;`
+wwsuid=`find / -perm -4002 -type f ${find_sort_printf} -exec ls -la {} 2>/dev/null \; | find_sort_pipe_function`
 if [ "$wwsuid" ]; then
   echo -e "\e[00;33m[+] World-writable SUID files:\e[00m\n$wwsuid" 
   echo -e "\n"
 fi
 
 #lists world-writable suid files owned by root
-wwsuidrt=`find / -uid 0 -perm -4002 -type f -exec ls -la {} 2>/dev/null \;`
+wwsuidrt=`find / -uid 0 -perm -4002 -type f ${find_sort_printf} -exec ls -la {} 2>/dev/null \; | find_sort_pipe_function`
 if [ "$wwsuidrt" ]; then
   echo -e "\e[00;33m[+] World-writable SUID files owned by root:\e[00m\n$wwsuidrt" 
   echo -e "\n"
 fi
 
 #search for sgid files
-findsgid=`find / -perm -2000 -type f -exec ls -la {} 2>/dev/null \;`
+findsgid=`find / -perm -2000 -type f ${find_sort_printf} -exec ls -la {} 2>/dev/null \; | find_sort_pipe_function`
 if [ "$findsgid" ]; then
   echo -e "\e[00;31m[-] SGID files:\e[00m\n$findsgid" 
   echo -e "\n"
@@ -870,21 +895,21 @@ if [ "$export" ] && [ "$findsgid" ]; then
 fi
 
 #list of 'interesting' sgid files
-intsgid=`find / -perm -2000 -type f  -exec ls -la {} \; 2>/dev/null | grep -w $binarylist 2>/dev/null`
+intsgid=`find / -perm -2000 -type f ${find_sort_printf} -exec ls -la {} \; 2>/dev/null | find_sort_pipe_function | grep -w $binarylist 2>/dev/null`
 if [ "$intsgid" ]; then
   echo -e "\e[00;33m[+] Possibly interesting SGID files:\e[00m\n$intsgid" 
   echo -e "\n"
 fi
 
 #lists world-writable sgid files
-wwsgid=`find / -perm -2002 -type f -exec ls -la {} 2>/dev/null \;`
+wwsgid=`find / -perm -2002 -type f ${find_sort_printf} -exec ls -la {} 2>/dev/null \; | find_sort_pipe_function`
 if [ "$wwsgid" ]; then
   echo -e "\e[00;33m[+] World-writable SGID files:\e[00m\n$wwsgid" 
   echo -e "\n"
 fi
 
 #lists world-writable sgid files owned by root
-wwsgidrt=`find / -uid 0 -perm -2002 -type f -exec ls -la {} 2>/dev/null \;`
+wwsgidrt=`find / -uid 0 -perm -2002 -type f ${find_sort_printf} -exec ls -la {} 2>/dev/null \; | find_sort_pipe_function`
 if [ "$wwsgidrt" ]; then
   echo -e "\e[00;33m[+] World-writable SGID files owned by root:\e[00m\n$wwsgidrt" 
   echo -e "\n"
@@ -921,12 +946,12 @@ matchedcaps=`echo -e "$userswithcaps" | grep \`whoami\` | awk '{print $1}' 2>/de
 			echo -e "\e[00;33m[+] Files with the same capabilities associated with the current user (You may want to try abusing those capabilties):\e[00m\n$matchedfiles"
 			echo -e "\n"
 			#lists the permissions of the files having the same capabilies associated with the current user
-			matchedfilesperms=`echo -e "$matchedfiles" | awk '{print $1}' | while read -r f; do ls -la $f ;done 2>/dev/null`
+			matchedfilesperms=`echo -e "$matchedfiles" | awk '{print $1}' | while read -r f; do ls -la "${ls_sort_flags}" $f ;done 2>/dev/null`
 			echo -e "\e[00;33m[+] Permissions of files with the same capabilities associated with the current user:\e[00m\n$matchedfilesperms"
 			echo -e "\n"
 			if [ "$matchedfilesperms" ]; then
 				#checks if any of the files with same capabilities associated with the current user is writable
-				writablematchedfiles=`echo -e "$matchedfiles" | awk '{print $1}' | while read -r f; do find $f -writable -exec ls -la {} + ;done 2>/dev/null`
+				writablematchedfiles=`echo -e "$matchedfiles" | awk '{print $1}' | while read -r f; do find $f -writable ${find_sort_printf} -exec ls -la {} + | find_sort_pipe_function;done 2>/dev/null`
 				if [ "$writablematchedfiles" ]; then
 					echo -e "\e[00;33m[+] User/Group writable files with the same capabilities associated with the current user:\e[00m\n$writablematchedfiles"
 					echo -e "\n"
@@ -956,7 +981,7 @@ fi
 
 #look for git credential files - thanks djhohnstein
 if [ "$thorough" = "1" ]; then
-gitcredfiles=`find / -name ".git-credentials" 2>/dev/null`
+gitcredfiles=`find / -name ".git-credentials" ${find_sort_printf} -exec ls -la {} 2>/dev/null\; | find_sort_pipe_function`
 	if [ "$gitcredfiles" ]; then
   		echo -e "\e[00;33m[+] Git credentials saved on the machine!:\e[00m\n$gitcredfiles"
   		echo -e "\n"
@@ -965,7 +990,7 @@ fi
 
 #list all world-writable files excluding /proc and /sys
 if [ "$thorough" = "1" ]; then
-wwfiles=`find / ! -path "*/proc/*" ! -path "/sys/*" -perm -2 -type f -exec ls -la {} 2>/dev/null \;`
+wwfiles=`find / ! -path "*/proc/*" ! -path "/sys/*" -perm -2 -type f ${find_sort_printf} -exec ls -la {} 2>/dev/null \; | find_sort_pipe_function`
 	if [ "$wwfiles" ]; then
 		echo -e "\e[00;31m[-] World-writable files (excluding /proc and /sys):\e[00m\n$wwfiles" 
 		echo -e "\n"
@@ -1183,7 +1208,7 @@ if [ "$keyword" = "" ];then
 fi
 
 #quick extract of .conf files from /etc - only 1 level
-allconf=`find /etc/ -maxdepth 1 -name *.conf -type f -exec ls -la {} \; 2>/dev/null`
+allconf=`find /etc/ -maxdepth 1 -name *.conf -type f ${find_sort_printf} -exec ls -la {} \; 2>/dev/null | find_sort_pipe_function`
 if [ "$allconf" ]; then
   echo -e "\e[00;31m[-] All *.conf files in /etc (recursive 1 level):\e[00m\n$allconf" 
   echo -e "\n"
@@ -1226,7 +1251,7 @@ if [ "$checkbashhist" ]; then
 fi
 
 #is there any mail accessible
-readmail=`ls -la /var/mail 2>/dev/null`
+readmail=`ls -la "${ls_sort_flags}" /var/mail 2>/dev/null`
 if [ "$readmail" ]; then
   echo -e "\e[00;31m[-] Any interesting mail in /var/mail:\e[00m\n$readmail" 
   echo -e "\n"
@@ -1249,7 +1274,7 @@ docker_checks()
 {
 
 #specific checks - check to see if we're in a docker container
-dockercontainer=` grep -i docker /proc/self/cgroup  2>/dev/null; find / -name "*dockerenv*" -exec ls -la {} \; 2>/dev/null`
+dockercontainer=` grep -i docker /proc/self/cgroup  2>/dev/null; find / -name "*dockerenv*" ${find_sort_printf} -exec ls -la {} \; 2>/dev/null | find_sort_pipe_function`
 if [ "$dockercontainer" ]; then
   echo -e "\e[00;33m[+] Looks like we're in a Docker container:\e[00m\n$dockercontainer" 
   echo -e "\n"
@@ -1270,14 +1295,14 @@ if [ "$dockergrp" ]; then
 fi
 
 #specific checks - are there any docker files present
-dockerfiles=`find / -name Dockerfile -exec ls -l {} 2>/dev/null \;`
+dockerfiles=`find / -name Dockerfile ${find_sort_printf} -exec ls -l {} 2>/dev/null \; | find_sort_pipe_function`
 if [ "$dockerfiles" ]; then
   echo -e "\e[00;31m[-] Anything juicy in the Dockerfile:\e[00m\n$dockerfiles" 
   echo -e "\n"
 fi
 
 #specific checks - are there any docker files present
-dockeryml=`find / -name docker-compose.yml -exec ls -l {} 2>/dev/null \;`
+dockeryml=`find / -name docker-compose.yml ${find_sort_printf} -exec ls -l {} 2>/dev/null \; | find_sort_pipe_function`
 if [ "$dockeryml" ]; then
   echo -e "\e[00;31m[-] Anything juicy in docker-compose.yml:\e[00m\n$dockeryml" 
   echo -e "\n"
@@ -1324,13 +1349,14 @@ call_each()
   footer
 }
 
-while getopts "h:k:r:e:st" option; do
+while getopts "h:k:r:e:stn" option; do
  case "${option}" in
     k) keyword=${OPTARG};;
     r) report=${OPTARG}"-"`date +"%d-%m-%y"`;;
     e) export=${OPTARG};;
     s) sudopass=1;;
     t) thorough=1;;
+    n) sort=1;;
     h) usage; exit;;
     *) usage; exit;;
  esac
