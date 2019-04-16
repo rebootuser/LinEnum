@@ -877,14 +877,14 @@ if [ "$intsgid" ]; then
 fi
 
 #lists world-writable sgid files
-wwsgid=`find / -perm -2007 -type f -exec ls -la {} 2>/dev/null \;`
+wwsgid=`find / -perm -2002 -type f -exec ls -la {} 2>/dev/null \;`
 if [ "$wwsgid" ]; then
   echo -e "\e[00;33m[+] World-writable SGID files:\e[00m\n$wwsgid" 
   echo -e "\n"
 fi
 
 #lists world-writable sgid files owned by root
-wwsgidrt=`find / -uid 0 -perm -2007 -type f -exec ls -la {} 2>/dev/null \;`
+wwsgidrt=`find / -uid 0 -perm -2002 -type f -exec ls -la {} 2>/dev/null \;`
 if [ "$wwsgidrt" ]; then
   echo -e "\e[00;33m[+] World-writable SGID files owned by root:\e[00m\n$wwsgidrt" 
   echo -e "\n"
