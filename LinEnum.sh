@@ -1,6 +1,6 @@
 #!/bin/bash
 #A script to enumerate local information from a Linux host
-version="version 0.95"
+version="version 0.96"
 #@rebootuser
 
 #help function
@@ -844,14 +844,14 @@ if [ "$intsuid" ]; then
 fi
 
 #lists word-writable suid files
-wwsuid=`find / -perm -4007 -type f -exec ls -la {} 2>/dev/null \;`
+wwsuid=`find / -perm -4002 -type f -exec ls -la {} 2>/dev/null \;`
 if [ "$wwsuid" ]; then
   echo -e "\e[00;33m[+] World-writable SUID files:\e[00m\n$wwsuid" 
   echo -e "\n"
 fi
 
 #lists world-writable suid files owned by root
-wwsuidrt=`find / -uid 0 -perm -4007 -type f -exec ls -la {} 2>/dev/null \;`
+wwsuidrt=`find / -uid 0 -perm -4002 -type f -exec ls -la {} 2>/dev/null \;`
 if [ "$wwsuidrt" ]; then
   echo -e "\e[00;33m[+] World-writable SUID files owned by root:\e[00m\n$wwsuidrt" 
   echo -e "\n"
