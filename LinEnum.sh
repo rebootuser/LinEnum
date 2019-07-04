@@ -538,26 +538,26 @@ if [ ! "$defroute" ] && [ "$defrouteip" ]; then
 fi
 
 #listening TCP
-tcpservs=`netstat -antp 2>/dev/null`
+tcpservs=`netstat -ntpl 2>/dev/null`
 if [ "$tcpservs" ]; then
   echo -e "\e[00;31m[-] Listening TCP:\e[00m\n$tcpservs" 
   echo -e "\n"
 fi
 
-tcpservsip=`ss -t 2>/dev/null`
+tcpservsip=`ss -t -l -n 2>/dev/null`
 if [ ! "$tcpservs" ] && [ "$tcpservsip" ]; then
   echo -e "\e[00;31m[-] Listening TCP:\e[00m\n$tcpservsip" 
   echo -e "\n"
 fi
 
 #listening UDP
-udpservs=`netstat -anup 2>/dev/null`
+udpservs=`netstat -nupl 2>/dev/null`
 if [ "$udpservs" ]; then
   echo -e "\e[00;31m[-] Listening UDP:\e[00m\n$udpservs" 
   echo -e "\n"
 fi
 
-udpservsip=`ip -u 2>/dev/null`
+udpservsip=`ss -u -l -n 2>/dev/null`
 if [ ! "$udpservs" ] && [ "$udpservsip" ]; then
   echo -e "\e[00;31m[-] Listening UDP:\e[00m\n$udpservsip" 
   echo -e "\n"
