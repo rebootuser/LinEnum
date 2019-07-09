@@ -5,7 +5,7 @@ Note: Export functionality is currently in the experimental stage.
 
 General usage:
 
-version 0.95
+version 0.97
 
 * Example: ./LinEnum.sh -s -k keyword -r report -e /tmp/ -t 
 
