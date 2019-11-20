@@ -737,25 +737,25 @@ if [ "$postgver" ]; then
 fi
 
 #checks to see if any postgres password exists and connects to DB 'template0' - following commands are a variant on this
-postcon1=`psql -U postgres template0 -c 'select version()' 2>/dev/null | grep version`
+postcon1=`psql -U postgres -w template0 -c 'select version()' 2>/dev/null | grep version`
 if [ "$postcon1" ]; then
   echo -e "\e[00;33m[+] We can connect to Postgres DB 'template0' as user 'postgres' with no password!:\e[00m\n$postcon1" 
   echo -e "\n"
 fi
 
-postcon11=`psql -U postgres template1 -c 'select version()' 2>/dev/null | grep version`
+postcon11=`psql -U postgres -w template1 -c 'select version()' 2>/dev/null | grep version`
 if [ "$postcon11" ]; then
   echo -e "\e[00;33m[+] We can connect to Postgres DB 'template1' as user 'postgres' with no password!:\e[00m\n$postcon11" 
   echo -e "\n"
 fi
 
-postcon2=`psql -U pgsql template0 -c 'select version()' 2>/dev/null | grep version`
+postcon2=`psql -U pgsql -w template0 -c 'select version()' 2>/dev/null | grep version`
 if [ "$postcon2" ]; then
   echo -e "\e[00;33m[+] We can connect to Postgres DB 'template0' as user 'psql' with no password!:\e[00m\n$postcon2" 
   echo -e "\n"
 fi
 
-postcon22=`psql -U pgsql template1 -c 'select version()' 2>/dev/null | grep version`
+postcon22=`psql -U pgsql -w template1 -c 'select version()' 2>/dev/null | grep version`
 if [ "$postcon22" ]; then
   echo -e "\e[00;33m[+] We can connect to Postgres DB 'template1' as user 'psql' with no password!:\e[00m\n$postcon22" 
   echo -e "\n"
