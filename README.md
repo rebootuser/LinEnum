@@ -5,7 +5,7 @@ Note: Export functionality is currently in the experimental stage.
 
 General usage:
 
-version 0.98
+version 0.981
 
 * Example: ./LinEnum.sh -s -k keyword -r report -e /tmp/ -t 
 
@@ -95,6 +95,7 @@ High-level summary of the checks/tasks performed by LinEnum:
   * Show NFS server details
   * Locate *.conf and *.log files containing keyword supplied at script runtime
   * List all *.conf files located in /etc
+  * .bak file search
   * Locate mail
 * Platform/software specific tests:
   * Checks to determine if we're in a Docker container
