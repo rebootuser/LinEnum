@@ -375,7 +375,9 @@ fi
 #current path configuration
 pathinfo=`echo $PATH 2>/dev/null`
 if [ "$pathinfo" ]; then
+  pathswriteable=`ls -ld $(echo $PATH | tr ":" " ")`
   echo -e "\e[00;31m[-] Path information:\e[00m\n$pathinfo" 
+  echo -e "$pathswriteable"
   echo -e "\n"
 fi
 
