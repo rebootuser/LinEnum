@@ -1,6 +1,6 @@
 #!/bin/bash
 #A script to enumerate local information from a Linux host
-version="version 0.98"
+version="version 0.981"
 #@rebootuser
 
 #help function
@@ -1228,7 +1228,7 @@ fi
 #any .bak files that may be of interest
 bakfiles=`find / -name *.bak -type f 2</dev/null`
 if [ "$bakfiles" ]; then
-  echo -e "\e[00;31m[-] Location and Permissions (if accessible) of .bak file(s):\e[00m\n"
+  echo -e "\e[00;31m[-] Location and Permissions (if accessible) of .bak file(s):\e[00m"
   for bak in `echo $bakfiles`; do ls -la $bak;done
   echo -e "\n"
 fi
