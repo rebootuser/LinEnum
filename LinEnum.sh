@@ -827,7 +827,8 @@ echo -e "\e[00;31m[-] Can we read/write sensitive files:\e[00m" ; ls -la /etc/pa
 echo -e "\n" 
 
 #search for suid files
-findsuid=`find / -perm -4000 -type f -exec ls -la {} 2>/dev/null \;`
+allsuid=`find / -perm -4000 -type f 2>/dev/null`
+findsuid=`find $allsuid -perm -4000 -type f -exec ls -la {} 2>/dev/null \;`
 if [ "$findsuid" ]; then
   echo -e "\e[00;31m[-] SUID files:\e[00m\n$findsuid" 
   echo -e "\n"
@@ -839,28 +840,29 @@ if [ "$export" ] && [ "$findsuid" ]; then
 fi
 
 #list of 'interesting' suid files - feel free to make additions
-intsuid=`find / -perm -4000 -type f -exec ls -la {} \; 2>/dev/null | grep -w $binarylist 2>/dev/null`
+intsuid=`find $allsuid -perm -4000 -type f -exec ls -la {} \; 2>/dev/null | grep -w $binarylist 2>/dev/null`
 if [ "$intsuid" ]; then
   echo -e "\e[00;33m[+] Possibly interesting SUID files:\e[00m\n$intsuid" 
   echo -e "\n"
 fi
 
-#lists word-writable suid files
-wwsuid=`find / -perm -4002 -type f -exec ls -la {} 2>/dev/null \;`
+#lists world-writable suid files
+wwsuid=`find $allsuid -perm -4002 -type f -exec ls -la {} 2>/dev/null \;`
 if [ "$wwsuid" ]; then
   echo -e "\e[00;33m[+] World-writable SUID files:\e[00m\n$wwsuid" 
   echo -e "\n"
 fi
 
 #lists world-writable suid files owned by root
-wwsuidrt=`find / -uid 0 -perm -4002 -type f -exec ls -la {} 2>/dev/null \;`
+wwsuidrt=`find $allsuid -uid 0 -perm -4002 -type f -exec ls -la {} 2>/dev/null \;`
 if [ "$wwsuidrt" ]; then
   echo -e "\e[00;33m[+] World-writable SUID files owned by root:\e[00m\n$wwsuidrt" 
   echo -e "\n"
 fi
 
 #search for sgid files
-findsgid=`find / -perm -2000 -type f -exec ls -la {} 2>/dev/null \;`
+allsgid=`find / -perm -2000 -type f 2>/dev/null`
+findsgid=`find $allsgid -perm -2000 -type f -exec ls -la {} 2>/dev/null \;`
 if [ "$findsgid" ]; then
   echo -e "\e[00;31m[-] SGID files:\e[00m\n$findsgid" 
   echo -e "\n"
@@ -872,21 +874,21 @@ if [ "$export" ] && [ "$findsgid" ]; then
 fi
 
 #list of 'interesting' sgid files
-intsgid=`find / -perm -2000 -type f  -exec ls -la {} \; 2>/dev/null | grep -w $binarylist 2>/dev/null`
+intsgid=`find $allsgid -perm -2000 -type f  -exec ls -la {} \; 2>/dev/null | grep -w $binarylist 2>/dev/null`
 if [ "$intsgid" ]; then
   echo -e "\e[00;33m[+] Possibly interesting SGID files:\e[00m\n$intsgid" 
   echo -e "\n"
 fi
 
 #lists world-writable sgid files
-wwsgid=`find / -perm -2002 -type f -exec ls -la {} 2>/dev/null \;`
+wwsgid=`find $allsgid -perm -2002 -type f -exec ls -la {} 2>/dev/null \;`
 if [ "$wwsgid" ]; then
   echo -e "\e[00;33m[+] World-writable SGID files:\e[00m\n$wwsgid" 
   echo -e "\n"
 fi
 
 #lists world-writable sgid files owned by root
-wwsgidrt=`find / -uid 0 -perm -2002 -type f -exec ls -la {} 2>/dev/null \;`
+wwsgidrt=`find $allsgid -uid 0 -perm -2002 -type f -exec ls -la {} 2>/dev/null \;`
 if [ "$wwsgidrt" ]; then
   echo -e "\e[00;33m[+] World-writable SGID files owned by root:\e[00m\n$wwsgidrt" 
   echo -e "\n"
