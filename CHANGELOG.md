@@ -2,6 +2,26 @@
 
 Note: Export functionality is currently in the experimental stage.
 
+## V0.982 (release 07-01-2020)
+* Improvements to script execution speed by @Jrhenderson11 (https://github.com/rebootuser/LinEnum/pull/45 & https://github.com/rebootuser/LinEnum/commit/13741ce79fd5627da64bcf6a04fea11829e91ec8)
+
+## V0.981 (release 21-11-2019)
+* List permissions on PATH directories to see if they are writable by @stealthcopter
+* Added checks for .bak files by @richardcurteis
+
+## V0.98 (18/10/19 & 20/11/19)
+* Added further useful binaries to list by @Anon-Exploiter
+* Fixes to psql password issue by @Disassembler0
+
+## V0.971 (11/09/19)
+* Added useful binaries to list by @Anon-Exploiter
+
+## V0.97 (release 09/07/2019)
+* Improvements to TCP/UDP socket output by @Hypnoze57
+
+## V0.96 (release 16/04/2019)
+* Fixes to SUID/SGID checks
+
 ## V0.95 (release 24-01-2019)
 Additions
 * Additional checks provided by @djhohnstein (https://github.com/djhohnstein/LinEnum/commit/bf4ce1ad3beb392cab5d388e364972373533c721#diff-679e8fbdcfe07231f5eda7a8b491511dR1350)
