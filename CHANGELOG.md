@@ -9,17 +9,17 @@ Note: Export functionality is currently in the experimental stage.
 * List permissions on PATH directories to see if they are writable by @stealthcopter
 * Added checks for .bak files by @richardcurteis
 
-## V0.98 (18/10/19 & 20/11/19)
+## V0.98 (18-10-19 & 20-11-19)
 * Added further useful binaries to list by @Anon-Exploiter
 * Fixes to psql password issue by @Disassembler0
 
-## V0.971 (11/09/19)
+## V0.971 (11-09-19)
 * Added useful binaries to list by @Anon-Exploiter
 
-## V0.97 (release 09/07/2019)
+## V0.97 (release 09-07-2019)
 * Improvements to TCP/UDP socket output by @Hypnoze57
 
-## V0.96 (release 16/04/2019)
+## V0.96 (release 16-04-2019)
 * Fixes to SUID/SGID checks
 
 ## V0.95 (release 24-01-2019)
