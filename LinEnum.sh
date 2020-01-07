@@ -942,7 +942,7 @@ fi
 
 #look for private keys - thanks djhohnstein
 if [ "$thorough" = "1" ]; then
-privatekeyfiles=`grep -rl "PRIVATE KEY-----" /home 2>/dev/null`
+privatekeyfiles=`grep -rl "[P]RIVATE KEY-----" /home 2>/dev/null`
 	if [ "$privatekeyfiles" ]; then
   		echo -e "\e[00;33m[+] Private SSH keys found!:\e[00m\n$privatekeyfiles"
   		echo -e "\n"
@@ -951,7 +951,7 @@ fi
 
 #look for AWS keys - thanks djhohnstein
 if [ "$thorough" = "1" ]; then
-awskeyfiles=`grep -rli "aws_secret_access_key" /home 2>/dev/null`
+awskeyfiles=`grep -rli "[a]ws_secret_access_key" /home 2>/dev/null`
 	if [ "$awskeyfiles" ]; then
   		echo -e "\e[00;33m[+] AWS secret keys found!:\e[00m\n$awskeyfiles"
   		echo -e "\n"
