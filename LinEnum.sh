@@ -51,11 +51,10 @@ if [ "$export" ]; then
 	echo "[+] Export location = $export" 
 fi
 
-if [ "$thorough" ]; then 
+[ "$thorough" ] && {
 	echo "[+] Thorough tests = Enabled" 
-else 
 	echo -e "\e[00;33m[+] Thorough tests = Disabled\e[00m" 
-fi
+}
 
 sleep 2
 
@@ -277,72 +276,72 @@ if [ "$homedirperms" ]; then
 fi
 
 #looks for files we can write to that don't belong to us
-if [ "$thorough" = "1" ]; then
+[ "$thorough" ] && {
   grfilesall=`find / -writable ! -user \`whoami\` -type f ! -path "/proc/*" ! -path "/sys/*" -exec ls -al {} \; 2>/dev/null`
   if [ "$grfilesall" ]; then
     echo -e "\e[00;31m[-] Files not owned by user but writable by group:\e[00m\n$grfilesall" 
     echo -e "\n"
   fi
-fi
+}
 
 #looks for files that belong to us
-if [ "$thorough" = "1" ]; then
+[ "$thorough" ] && {
   ourfilesall=`find / -user \`whoami\` -type f ! -path "/proc/*" ! -path "/sys/*" -exec ls -al {} \; 2>/dev/null`
   if [ "$ourfilesall" ]; then
     echo -e "\e[00;31m[-] Files owned by our user:\e[00m\n$ourfilesall"
     echo -e "\n"
   fi
-fi
+}
 
 #looks for hidden files
-if [ "$thorough" = "1" ]; then
+[ "$thorough" ] && {
   hiddenfiles=`find / -name ".*" -type f ! -path "/proc/*" ! -path "/sys/*" -exec ls -al {} \; 2>/dev/null`
   if [ "$hiddenfiles" ]; then
     echo -e "\e[00;31m[-] Hidden files:\e[00m\n$hiddenfiles"
     echo -e "\n"
   fi
-fi
+}
 
 #looks for world-reabable files within /home - depending on number of /home dirs & files, this can take some time so is only 'activated' with thorough scanning switch
-if [ "$thorough" = "1" ]; then
+[ "$thorough" ] && {
 wrfileshm=`find /home/ -perm -4 -type f -exec ls -al {} \; 2>/dev/null`
 	if [ "$wrfileshm" ]; then
 		echo -e "\e[00;31m[-] World-readable files within /home:\e[00m\n$wrfileshm" 
 		echo -e "\n"
 	fi
-fi
+}
 
-if [ "$thorough" = "1" ]; then
+[ "$thorough" ] && {
 	if [ "$export" ] && [ "$wrfileshm" ]; then
 		mkdir $format/wr-files/ 2>/dev/null
 		for i in $wrfileshm; do cp --parents $i $format/wr-files/ ; done 2>/dev/null
 	fi
-fi
+}
 
 #lists current user's home directory contents
-if [ "$thorough" = "1" ]; then
+[ "$thorough" ] && {
 homedircontents=`ls -ahl ~ 2>/dev/null`
 	if [ "$homedircontents" ] ; then
 		echo -e "\e[00;31m[-] Home directory contents:\e[00m\n$homedircontents" 
 		echo -e "\n" 
 	fi
-fi
+}
 
 #checks for if various ssh files are accessible - this can take some time so is only 'activated' with thorough scanning switch
-if [ "$thorough" = "1" ]; then
+[ "$thorough" ] && {
 sshfiles=`find / \( -name "id_dsa*" -o -name "id_rsa*" -o -name "known_hosts" -o -name "authorized_hosts" -o -name "authorized_keys" \) -exec ls -la {} 2>/dev/null \;`
 	if [ "$sshfiles" ]; then
 		echo -e "\e[00;31m[-] SSH keys/host information found in the following locations:\e[00m\n$sshfiles" 
 		echo -e "\n"
 	fi
-fi
+}
 
-if [ "$thorough" = "1" ]; then
+[ "$thorough" ] && {
 	if [ "$export" ] && [ "$sshfiles" ]; then
 		mkdir $format/ssh-files/ 2>/dev/null
 		for i in $sshfiles; do cp --parents $i $format/ssh-files/; done 2>/dev/null
 	fi
-fi
+}
 
 #is root permitted to login via ssh
 sshrootlogin=`grep "PermitRootLogin " /etc/ssh/sshd_config 2>/dev/null | grep -v "#" | awk '{print  $2}'`
@@ -466,7 +465,7 @@ if [ "$cronother" ]; then
 fi
 
 # list systemd timers
-if [ "$thorough" = "1" ]; then
+[ "$thorough" ] && {
   # include inactive timers in thorough mode
   systemdtimers="$(systemctl list-timers --all 2>/dev/null)"
   info=""
@@ -474,7 +473,7 @@ else
   systemdtimers="$(systemctl list-timers 2>/dev/null |head -n -1 2>/dev/null)"
   # replace the info in the output with a hint towards thorough mode
   info="\e[2mEnable thorough tests to see inactive timers\e[00m"
-fi
+}
 if [ "$systemdtimers" ]; then
   echo -e "\e[00;31m[-] Systemd timers:\e[00m\n$systemdtimers\n$info"
   echo -e "\n"
@@ -797,13 +796,13 @@ if [ "$htpasswd" ]; then
 fi
 
 #anything in the default http home dirs (a thorough only check as output can be large)
-if [ "$thorough" = "1" ]; then
+[ "$thorough" ] && {
   apachehomedirs=`ls -alhR /var/www/ 2>/dev/null; ls -alhR /srv/www/htdocs/ 2>/dev/null; ls -alhR /usr/local/www/apache2/data/ 2>/dev/null; ls -alhR /opt/lampp/htdocs/ 2>/dev/null`
   if [ "$apachehomedirs" ]; then
     echo -e "\e[00;31m[-] www home dir contents:\e[00m\n$apachehomedirs" 
     echo -e "\n"
   fi
-fi
+}
 
 }
 
@@ -941,47 +940,47 @@ matchedcaps=`echo -e "$userswithcaps" | grep \`whoami\` | awk '{print $1}' 2>/de
 fi
 
 #look for private keys - thanks djhohnstein
-if [ "$thorough" = "1" ]; then
+[ "$thorough" ] && {
 privatekeyfiles=`grep -rl "PRIVATE KEY-----" /home 2>/dev/null`
 	if [ "$privatekeyfiles" ]; then
   		echo -e "\e[00;33m[+] Private SSH keys found!:\e[00m\n$privatekeyfiles"
   		echo -e "\n"
 	fi
-fi
+}
 
 #look for AWS keys - thanks djhohnstein
-if [ "$thorough" = "1" ]; then
+[ "$thorough" ] && {
 awskeyfiles=`grep -rli "aws_secret_access_key" /home 2>/dev/null`
 	if [ "$awskeyfiles" ]; then
   		echo -e "\e[00;33m[+] AWS secret keys found!:\e[00m\n$awskeyfiles"
   		echo -e "\n"
 	fi
-fi
+}
 
 #look for git credential files - thanks djhohnstein
-if [ "$thorough" = "1" ]; then
+[ "$thorough" ] && {
 gitcredfiles=`find / -name ".git-credentials" 2>/dev/null`
 	if [ "$gitcredfiles" ]; then
   		echo -e "\e[00;33m[+] Git credentials saved on the machine!:\e[00m\n$gitcredfiles"
   		echo -e "\n"
 	fi
-fi
+}
 
 #list all world-writable files excluding /proc and /sys
-if [ "$thorough" = "1" ]; then
+[ "$thorough" ] && {
 wwfiles=`find / ! -path "*/proc/*" ! -path "/sys/*" -perm -2 -type f -exec ls -la {} 2>/dev/null \;`
 	if [ "$wwfiles" ]; then
 		echo -e "\e[00;31m[-] World-writable files (excluding /proc and /sys):\e[00m\n$wwfiles" 
 		echo -e "\n"
 	fi
-fi
+}
 
-if [ "$thorough" = "1" ]; then
+[ "$thorough" ] && {
 	if [ "$export" ] && [ "$wwfiles" ]; then
 		mkdir $format/ww-files/ 2>/dev/null
 		for i in $wwfiles; do cp --parents $i $format/ww-files/; done 2>/dev/null
 	fi
-fi
+}
 
 #are any .plan files accessible in /home (could contain useful information)
 usrplan=`find /home -iname *.plan -exec ls -la {} \; -exec cat {} 2>/dev/null \;`
@@ -1052,7 +1051,7 @@ if [ "$export" ] && [ "$nfsexports" ]; then
   cp /etc/exports $format/etc-export/exports 2>/dev/null
 fi
 
-if [ "$thorough" = "1" ]; then
+[ "$thorough" ] && {
   #phackt
   #displaying /etc/fstab
   fstab=`cat /etc/fstab 2>/dev/null`
@@ -1061,7 +1060,7 @@ if [ "$thorough" = "1" ]; then
     echo -e "$fstab"
     echo -e "\n"
   fi
-fi
+}
 
 #looking for credentials in /etc/fstab
 fstab=`grep username /etc/fstab 2>/dev/null |awk '{sub(/.*\username=/,"");sub(/\,.*/,"")}1' 2>/dev/null| xargs -r echo username: 2>/dev/null; grep password /etc/fstab 2>/dev/null |awk '{sub(/.*\password=/,"");sub(/\,.*/,"")}1' 2>/dev/null| xargs -r echo password: 2>/dev/null; grep domain /etc/fstab 2>/dev/null |awk '{sub(/.*\domain=/,"");sub(/\,.*/,"")}1' 2>/dev/null| xargs -r echo domain: 2>/dev/null`
