@@ -14,6 +14,7 @@ OPTIONS:
 * -e	Enter export location
 * -t	Include thorough (lengthy) tests
 * -s	Supply current user password to check sudo perms (INSECURE)
+* -i	Step through the output interactively
 * -r	Enter report name
 * -h	Displays this help text
 

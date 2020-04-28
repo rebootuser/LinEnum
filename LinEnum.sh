@@ -35,6 +35,12 @@ echo -e "\e[00;33m# $version\e[00m\n"
 
 }
 
+is_interactive() {
+	printf "\n"
+	read -p "Press any key to continue.."
+	printf "\n"
+}
+
 debug_info()
 {
 echo "[-] Debug Info" 
@@ -111,6 +117,9 @@ if [ "$hostnamed" ]; then
   echo -e "\e[00;31m[-] Hostname:\e[00m\n$hostnamed" 
   echo -e "\n" 
 fi
+
+[ "$interactive" ] && is_interactive
+
 }
 
 user_info()
@@ -350,6 +359,9 @@ if [ "$sshrootlogin" = "yes" ]; then
   echo -e "\e[00;31m[-] Root is allowed to login via SSH:\e[00m" ; grep "PermitRootLogin " /etc/ssh/sshd_config 2>/dev/null | grep -v "#" 
   echo -e "\n"
 fi
+
+[ "$interactive" ] && is_interactive
+
 }
 
 environmental_info()
@@ -413,6 +425,9 @@ if [ "$export" ] && [ "$logindefs" ]; then
   mkdir $format/etc-export/ 2>/dev/null
   cp /etc/login.defs $format/etc-export/login.defs 2>/dev/null
 fi
+
+[ "$interactive" ] && is_interactive
+
 }
 
 job_info()
@@ -479,6 +494,8 @@ if [ "$systemdtimers" ]; then
   echo -e "\e[00;31m[-] Systemd timers:\e[00m\n$systemdtimers\n$info"
   echo -e "\n"
 fi
+
+[ "$interactive" ] && is_interactive
 
 }
 
@@ -564,6 +581,9 @@ if [ ! "$udpservs" ] && [ "$udpservsip" ]; then
   echo -e "\e[00;31m[-] Listening UDP:\e[00m\n$udpservsip" 
   echo -e "\n"
 fi
+
+[ "$interactive" ] && is_interactive
+
 }
 
 services_info()
@@ -697,6 +717,9 @@ if [ "$systemdperms" ]; then
    echo -e "\e[00;33m[+] /lib/systemd/* config files not belonging to root:\e[00m\n$systemdperms"
    echo -e "\n"
 fi
+
+[ "$interactive" ] && is_interactive
+
 }
 
 software_configs()
@@ -804,6 +827,8 @@ if [ "$thorough" = "1" ]; then
     echo -e "\n"
   fi
 fi
+
+[ "$interactive" ] && is_interactive
 
 }
 
@@ -947,6 +972,7 @@ privatekeyfiles=`grep -rl "PRIVATE KEY-----" /home 2>/dev/null`
   		echo -e "\e[00;33m[+] Private SSH keys found!:\e[00m\n$privatekeyfiles"
   		echo -e "\n"
 	fi
+[ "$interactive" ] && is_interactive
 fi
 
 #look for AWS keys - thanks djhohnstein
@@ -956,6 +982,7 @@ awskeyfiles=`grep -rli "aws_secret_access_key" /home 2>/dev/null`
   		echo -e "\e[00;33m[+] AWS secret keys found!:\e[00m\n$awskeyfiles"
   		echo -e "\n"
 	fi
+[ "$interactive" ] && is_interactive
 fi
 
 #look for git credential files - thanks djhohnstein
@@ -965,6 +992,7 @@ gitcredfiles=`find / -name ".git-credentials" 2>/dev/null`
   		echo -e "\e[00;33m[+] Git credentials saved on the machine!:\e[00m\n$gitcredfiles"
   		echo -e "\n"
 	fi
+[ "$interactive" ] && is_interactive
 fi
 
 #list all world-writable files excluding /proc and /sys
@@ -974,6 +1002,7 @@ wwfiles=`find / ! -path "*/proc/*" ! -path "/sys/*" -perm -2 -type f -exec ls -l
 		echo -e "\e[00;31m[-] World-writable files (excluding /proc and /sys):\e[00m\n$wwfiles" 
 		echo -e "\n"
 	fi
+[ "$interactive" ] && is_interactive
 fi
 
 if [ "$thorough" = "1" ]; then
@@ -981,6 +1010,7 @@ if [ "$thorough" = "1" ]; then
 		mkdir $format/ww-files/ 2>/dev/null
 		for i in $wwfiles; do cp --parents $i $format/ww-files/; done 2>/dev/null
 	fi
+[ "$interactive" ] && is_interactive
 fi
 
 #are any .plan files accessible in /home (could contain useful information)
@@ -1005,6 +1035,8 @@ if [ "$export" ] && [ "$bsdusrplan" ]; then
   mkdir $format/plan_files/ 2>/dev/null
   for i in $bsdusrplan; do cp --parents $i $format/plan_files/; done 2>/dev/null
 fi
+
+[ "$interactive" ] && is_interactive
 
 #are there any .rhosts files accessible - these may allow us to login as another user etc.
 rhostsusr=`find /home -iname *.rhosts -exec ls -la {} 2>/dev/null \; -exec cat {} 2>/dev/null \;`
@@ -1061,6 +1093,7 @@ if [ "$thorough" = "1" ]; then
     echo -e "$fstab"
     echo -e "\n"
   fi
+[ "$interactive" ] && is_interactive
 fi
 
 #looking for credentials in /etc/fstab
@@ -1255,6 +1288,9 @@ if [ "$export" ] && [ "$readmailroot" ]; then
   mkdir $format/mail-from-root/ 2>/dev/null
   cp $readmailroot $format/mail-from-root/ 2>/dev/null
 fi
+
+[ "$interactive" ] && is_interactive
+
 }
 
 docker_checks()
@@ -1294,6 +1330,9 @@ if [ "$dockeryml" ]; then
   echo -e "\e[00;31m[-] Anything juicy in docker-compose.yml:\e[00m\n$dockeryml" 
   echo -e "\n"
 fi
+
+[ "$interactive" ] && is_interactive
+
 }
 
 lxc_container_checks()
@@ -1336,13 +1375,14 @@ call_each()
   footer
 }
 
-while getopts "h:k:r:e:st" option; do
+while getopts "h:k:r:e:sti" option; do
  case "${option}" in
     k) keyword=${OPTARG};;
     r) report=${OPTARG}"-"`date +"%d-%m-%y"`;;
     e) export=${OPTARG};;
     s) sudopass=1;;
     t) thorough=1;;
+    i) interactive=1;;
     h) usage; exit;;
     *) usage; exit;;
  esac
