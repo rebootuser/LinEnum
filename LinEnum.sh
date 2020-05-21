@@ -139,7 +139,7 @@ if [ "$loggedonusrs" ]; then
 fi
 
 #lists all id's and respective group(s)
-grpinfo=`for i in $(cut -d":" -f1 /etc/passwd 2>/dev/null);do id $i;done 2>/dev/null`
+grpinfo=`for i in $(cut -d":" -f1 /etc/passwd 2>/dev/null);do echo -e "$i : $(id $i)";done 2>/dev/null`
 if [ "$grpinfo" ]; then
   echo -e "\e[00;31m[-] Group memberships:\e[00m\n$grpinfo"
   echo -e "\n"
