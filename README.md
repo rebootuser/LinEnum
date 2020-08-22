@@ -48,7 +48,7 @@ High-level summary of the checks/tasks performed by LinEnum:
   * Checks if password hashes are stored in /etc/passwd
   * Extract full details for ‘default’ uid’s such as 0, 1000, 1001 etc
   * Attempt to read restricted files i.e. /etc/shadow
-  * List current users history files (i.e .bash_history, .nano_history etc.)
+  * List current users history files (i.e .bash_history, .zsh_history, fish_history, .nano_history etc.)
   * Basic SSH checks
 * Privileged access:
   * Which users have recently used sudo

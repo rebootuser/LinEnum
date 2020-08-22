@@ -1222,10 +1222,10 @@ if [ "$export" ] && [ "$roothist" ]; then
   cp $roothist $format/history_files/ 2>/dev/null
 fi
 
-#all accessible .bash_history files in /home
-checkbashhist=`find /home -name .bash_history -print -exec cat {} 2>/dev/null \;`
+#all accessible .bash_history, fish_history[.*], .zsh_history, .zhistory, .tcsh_history, .csh_history, .nano_history and .python_history files in /home
+checkbashhist=`find /home -regex '.*\.?\(bash_\|fish_\|zsh_\|z\|tcsh_\|csh_\|nano_\|python_\)history\(\..*\)?' -print -exec cat {} 2>/dev/null \;`
 if [ "$checkbashhist" ]; then
-  echo -e "\e[00;31m[-] Location and contents (if accessible) of .bash_history file(s):\e[00m\n$checkbashhist"
+  echo -e "\e[00;31m[-] Location and contents (if accessible) of .bash_history, fish_history, .zsh_history, .zhistory, .tcsh_history, .csh_history, .nano_history and .python_history files:\e[00m\n$checkbashhist"
   echo -e "\n"
 fi
 
