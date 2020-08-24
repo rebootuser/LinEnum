@@ -718,9 +718,9 @@ if [ "$redisver" ]; then
 fi
 
 #redis password check
-redisanon=`redis-cli "INFO" | grep "NOAUTH"`
+redisanon=`redis-cli "INFO" | grep "NOAUTH" 2>/dev/null`
 if ! [ "$redisanon" ]; then
-  echo -e "\e[00;31m[-] Redis is NOT PASSWORD PROTECTED!" 
+  echo -e "\e[00;31m[-] Redis is NOT PASSWORD PROTECTED!"
   echo -e "\n"
 fi
 
@@ -1046,6 +1046,12 @@ fi
 rhostssys=`find /etc -iname hosts.equiv -exec ls -la {} 2>/dev/null \; -exec cat {} 2>/dev/null \;`
 if [ "$rhostssys" ]; then
   echo -e "\e[00;33m[+] Hosts.equiv file and contents: \e[00m\n$rhostssys"
+  echo -e "\n"
+fi
+
+nfsmounts=`cat /proc/mounts | grep nfs 2>/dev/null`
+if [ "$nfsmounts" ]; then
+  echo -e "\e[00;33m[+] Connected NFS Mounts: \e[00m\n$nfsmounts"
   echo -e "\n"
 fi
 
