@@ -571,9 +571,9 @@ services_info()
 echo -e "\e[00;33m### SERVICES #############################################\e[00m" 
 
 #running processes
-psaux=`ps aux 2>/dev/null`
-if [ "$psaux" ]; then
-  echo -e "\e[00;31m[-] Running processes:\e[00m\n$psaux" 
+psfaux=`ps faux 2>/dev/null`
+if [ "$psfaux" ]; then
+  echo -e "\e[00;31m[-] Running processes:\e[00m\n$psfaux" 
   echo -e "\n"
 fi
 
