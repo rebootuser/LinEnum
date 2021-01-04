@@ -1230,12 +1230,10 @@ if [ "$checkbashhist" ]; then
 fi
 
 #any .bak files that may be of interest
-bakfiles=`find / -name *.bak -type f 2</dev/null`
-if [ "$bakfiles" ]; then
-  echo -e "\e[00;31m[-] Location and Permissions (if accessible) of .bak file(s):\e[00m"
-  for bak in `echo $bakfiles`; do ls -la $bak;done
-  echo -e "\n"
-fi
+echo -e "\e[00;31m[-] Location and Permissions (if accessible) of .bak file(s):\e[00m"
+find / -name *.bak -type f -exec ls -la {} \; 2>/dev/null
+echo -e "\n"
+
 
 #is there any mail accessible
 readmail=`ls -la /var/mail 2>/dev/null`
