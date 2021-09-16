@@ -1,0 +1,112 @@
+#!/bin/bash
+
+#
+#  linenum
+#
+# AUTHOR: @rebootuser et al.
+#
+# DESCRIPTION:
+#    Linenum is a script designed to enumerate a linux box. It should work to varying
+#    degrees on OSX/MacOS and various flavors of BSD.
+#
+# OUTPUT:
+#    plain-text
+#
+# PLATFORMS:
+#    Linux, OSX/MacOS, BSD
+#
+# DEPENDENCIES:
+#    Bash
+#
+# USAGE:
+#    See the help text for additional details
+#   ./lineum
+#
+# NOTES:
+#
+# LICENSE:
+#    MIT
+#
+
+version="version 0.982"
+#@rebootuser
+
+# Set the path to include the libraries. These are searched for in the same directory or within the path. We capture
+# the original path statement and then prepend the library directory. Once we have sourced all the functions we drop
+# back to the original path to minimize possible detections and avoid mangling.
+library_import() {
+
+  local ORIG_PATH="$PATH"
+  export PATH="includes:$PATH"
+
+  source applications
+  source binaries
+  source docker
+  source environment
+  source jobs
+  source k8s
+  source lxc
+  source networking
+  source services
+  source system
+  source users
+  source util
+
+  export PATH="$ORIG_PATH"
+
+  return 0
+}
+
+library_import
+
+call_each() {
+  header
+  #  debug_info
+  #  system_info
+  #  user_info
+  #  environmental_info
+  #  job_info
+  #  networking_info
+  #  services_info
+  #  software_configs
+  #  interesting_files
+  #  docker_checks
+  #  lxc_container_checks
+  footer
+}
+
+while getopts "h:k:r:e:st" option; do
+  case "${option}" in
+  k) keyword=${OPTARG} ;;
+  r) report=${OPTARG}"-"$(date +"%d-%m-%y") ;;
+  e) export=${OPTARG} ;;
+  s) sudopass=1 ;;
+  t) thorough=1 ;;
+  h)
+    usage
+    exit
+    ;;
+  *)
+    usage
+    exit
+    ;;
+  esac
+done
+
+call_each | tee -a $report 2>/dev/null
+#EndOfScript
+
+## linuxprivchecker.py
+## htb enum
+## suid3num
+## linux-smart-enumeration
+## uptux
+
+## hidden processes?
+## jails?
+## random pids
+## kernel msg buffer
+## process debugging
+
+## can/should we use posix
+## we should also provide a document for exploiting this
