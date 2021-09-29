@@ -1,19 +1,19 @@
 #!/bin/bash
 
 services_info() {
-  echo -e "\e[00;33m### SERVICES #############################################\e[00m"
+  echo -e "\e[$orange### SERVICES #############################################\e[$default"
 
   #running processes
   psaux=$(ps aux 2>/dev/null)
   if [ "$psaux" ]; then
-    echo -e "\e[00;31m[-] Running processes:\e[00m\n$psaux"
+    echo -e "\e[$red[-] Running processes:\e[$default\n$psaux"
     echo -e "\n"
   fi
 
   #lookup process binary path and permissisons
   procperm=$(ps aux 2>/dev/null | awk '{print $11}' | xargs -r ls -la 2>/dev/null | awk '!x[$0]++' 2>/dev/null)
   if [ "$procperm" ]; then
-    echo -e "\e[00;31m[-] Process binaries and associated permissions (from above list):\e[00m\n$procperm"
+    echo -e "\e[$red[-] Process binaries and associated permissions (from above list):\e[$default\n$procperm"
     echo -e "\n"
   fi
 
@@ -26,7 +26,7 @@ services_info() {
   #anything 'useful' in inetd.conf
   inetdread=$(cat /etc/inetd.conf 2>/dev/null)
   if [ "$inetdread" ]; then
-    echo -e "\e[00;31m[-] Contents of /etc/inetd.conf:\e[00m\n$inetdread"
+    echo -e "\e[$red[-] Contents of /etc/inetd.conf:\e[$default\n$inetdread"
     echo -e "\n"
   fi
 
@@ -38,13 +38,13 @@ services_info() {
   #very 'rough' command to extract associated binaries from inetd.conf & show permisisons of each
   inetdbinperms=$(awk '{print $7}' /etc/inetd.conf 2>/dev/null | xargs -r ls -la 2>/dev/null)
   if [ "$inetdbinperms" ]; then
-    echo -e "\e[00;31m[-] The related inetd binary permissions:\e[00m\n$inetdbinperms"
+    echo -e "\e[$red[-] The related inetd binary permissions:\e[$default\n$inetdbinperms"
     echo -e "\n"
   fi
 
   xinetdread=$(cat /etc/xinetd.conf 2>/dev/null)
   if [ "$xinetdread" ]; then
-    echo -e "\e[00;31m[-] Contents of /etc/xinetd.conf:\e[00m\n$xinetdread"
+    echo -e "\e[$red[-] Contents of /etc/xinetd.conf:\e[$default\n$xinetdread"
     echo -e "\n"
   fi
 
@@ -55,7 +55,7 @@ services_info() {
 
   xinetdincd=$(grep "/etc/xinetd.d" /etc/xinetd.conf 2>/dev/null)
   if [ "$xinetdincd" ]; then
-    echo -e "\e[00;31m[-] /etc/xinetd.d is included in /etc/xinetd.conf - associated binary permissions are listed below:\e[00m"
+    echo -e "\e[$red[-] /etc/xinetd.d is included in /etc/xinetd.conf - associated binary permissions are listed below:\e[$default"
     ls -la /etc/xinetd.d 2>/dev/null
     echo -e "\n"
   fi
@@ -63,72 +63,72 @@ services_info() {
   #very 'rough' command to extract associated binaries from xinetd.conf & show permisisons of each
   xinetdbinperms=$(awk '{print $7}' /etc/xinetd.conf 2>/dev/null | xargs -r ls -la 2>/dev/null)
   if [ "$xinetdbinperms" ]; then
-    echo -e "\e[00;31m[-] The related xinetd binary permissions:\e[00m\n$xinetdbinperms"
+    echo -e "\e[$red[-] The related xinetd binary permissions:\e[$default\n$xinetdbinperms"
     echo -e "\n"
   fi
 
   initdread=$(ls -la /etc/init.d 2>/dev/null)
   if [ "$initdread" ]; then
-    echo -e "\e[00;31m[-] /etc/init.d/ binary permissions:\e[00m\n$initdread"
+    echo -e "\e[$red[-] /etc/init.d/ binary permissions:\e[$default\n$initdread"
     echo -e "\n"
   fi
 
   #init.d files NOT belonging to root!
   initdperms=$(find /etc/init.d/ \! -uid 0 -type f 2>/dev/null | xargs -r ls -la 2>/dev/null)
   if [ "$initdperms" ]; then
-    echo -e "\e[00;31m[-] /etc/init.d/ files not belonging to root:\e[00m\n$initdperms"
+    echo -e "\e[$red[-] /etc/init.d/ files not belonging to root:\e[$default\n$initdperms"
     echo -e "\n"
   fi
 
   rcdread=$(ls -la /etc/rc.d/init.d 2>/dev/null)
   if [ "$rcdread" ]; then
-    echo -e "\e[00;31m[-] /etc/rc.d/init.d binary permissions:\e[00m\n$rcdread"
+    echo -e "\e[$red[-] /etc/rc.d/init.d binary permissions:\e[$default\n$rcdread"
     echo -e "\n"
   fi
 
   #init.d files NOT belonging to root!
   rcdperms=$(find /etc/rc.d/init.d \! -uid 0 -type f 2>/dev/null | xargs -r ls -la 2>/dev/null)
   if [ "$rcdperms" ]; then
-    echo -e "\e[00;31m[-] /etc/rc.d/init.d files not belonging to root:\e[00m\n$rcdperms"
+    echo -e "\e[$red[-] /etc/rc.d/init.d files not belonging to root:\e[$default\n$rcdperms"
     echo -e "\n"
   fi
 
   usrrcdread=$(ls -la /usr/local/etc/rc.d 2>/dev/null)
   if [ "$usrrcdread" ]; then
-    echo -e "\e[00;31m[-] /usr/local/etc/rc.d binary permissions:\e[00m\n$usrrcdread"
+    echo -e "\e[$red[-] /usr/local/etc/rc.d binary permissions:\e[$default\n$usrrcdread"
     echo -e "\n"
   fi
 
   #rc.d files NOT belonging to root!
   usrrcdperms=$(find /usr/local/etc/rc.d \! -uid 0 -type f 2>/dev/null | xargs -r ls -la 2>/dev/null)
   if [ "$usrrcdperms" ]; then
-    echo -e "\e[00;31m[-] /usr/local/etc/rc.d files not belonging to root:\e[00m\n$usrrcdperms"
+    echo -e "\e[$red[-] /usr/local/etc/rc.d files not belonging to root:\e[$default\n$usrrcdperms"
     echo -e "\n"
   fi
 
   initread=$(ls -la /etc/init/ 2>/dev/null)
   if [ "$initread" ]; then
-    echo -e "\e[00;31m[-] /etc/init/ config file permissions:\e[00m\n$initread"
+    echo -e "\e[$red[-] /etc/init/ config file permissions:\e[$default\n$initread"
     echo -e "\n"
   fi
 
   # upstart scripts not belonging to root
   initperms=$(find /etc/init \! -uid 0 -type f 2>/dev/null | xargs -r ls -la 2>/dev/null)
   if [ "$initperms" ]; then
-    echo -e "\e[00;31m[-] /etc/init/ config files not belonging to root:\e[00m\n$initperms"
+    echo -e "\e[$red[-] /etc/init/ config files not belonging to root:\e[$default\n$initperms"
     echo -e "\n"
   fi
 
   systemdread=$(ls -lthR /lib/systemd/ 2>/dev/null)
   if [ "$systemdread" ]; then
-    echo -e "\e[00;31m[-] /lib/systemd/* config file permissions:\e[00m\n$systemdread"
+    echo -e "\e[$red[-] /lib/systemd/* config file permissions:\e[$default\n$systemdread"
     echo -e "\n"
   fi
 
   # systemd files not belonging to root
   systemdperms=$(find /lib/systemd/ \! -uid 0 -type f 2>/dev/null | xargs -r ls -la 2>/dev/null)
   if [ "$systemdperms" ]; then
-    echo -e "\e[00;33m[+] /lib/systemd/* config files not belonging to root:\e[00m\n$systemdperms"
+    echo -e "\e[$orange[+] /lib/systemd/* config files not belonging to root:\e[$default\n$systemdperms"
     echo -e "\n"
   fi
 }
