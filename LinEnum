@@ -63,10 +63,10 @@ call_each() {
   header
 
   if [ "$debug" ]; then
-    debug_info
+    debug_info ## 1st pass complete
   fi
-  #  system_info  ## 1st pass complete
-  #  user_info
+  system_info ## 1st pass complete
+  user_info
   #  environmental_info
   #  job_info
   #  networking_info
@@ -97,7 +97,7 @@ while getopts "h:k:r:e:std" option; do
   esac
 done
 
-call_each | tee -a $report 2>/dev/null
+call_each | tee -a "$report" 2>/dev/null
 #EndOfScript
 
 ## linuxprivchecker.py

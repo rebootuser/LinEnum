@@ -1,36 +1,32 @@
 #!/bin/bash
 
 system_info() {
-  echo -e "\e[$orange### SYSTEM ##############################################\e[$default"
+  echo -e "\e[$orange######################## System ############################\e[$default"
 
   #basic kernel info
   unameinfo=$(uname -a 2>/dev/null)
   if [ "$unameinfo" ]; then
-    echo -e "\e[$red[-] Kernel information:\e[$default"
-    echo "$unameinfo"
-    echo ""
+    echo -e "\e[$cyan[-] Kernel information:\e[$default"
+    echo -e "$unameinfo\n"
   fi
 
   procver=$(cat /proc/version 2>/dev/null)
   if [ "$procver" ]; then
-    echo -e "\e[$red[-] Kernel information (continued):\e[$default"
-    echo "$procver"
-    echo ""
+    echo -e "\e[$cyan[-] Kernel information (continued):\e[$default"
+    echo -e "$procver\n"
   fi
 
   #search all *-release files for version info
   release=$(cat /etc/*-release 2>/dev/null)
   if [ "$release" ]; then
-    echo -e "\e[$red[-] Specific release information:\e[$default"
-    echo "$release"
-    echo ""
+    echo -e "\e[$cyan[-] Specific release information:\e[$default"
+    echo -e "$release\n"
   fi
 
   #target hostname info
   hostnamed=$(hostname 2>/dev/null)
   if [ "$hostnamed" ]; then
-    echo -e "\e[$red[-] Hostname:\e[$default"
-    echo "$hostnamed"
-    echo ""
+    echo -e "\e[$cyan[-] Hostname:\e[$default"
+    echo -e "$hostnamed\n"
   fi
 }

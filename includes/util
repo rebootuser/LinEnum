@@ -12,16 +12,16 @@ default="0m"
 
 # help function
 usage() {
-  echo -e "\n\e[$red##########################################################\e[$default"
-  echo -e "\e[$red#\e[$default" "\e[$orange Local Linux Enumeration & Privilege Escalation Script\e[$default" "\e[$red#\e[$default"
-  echo -e "\e[$red##########################################################\e[$default"
+  echo -e "\n\e[$blue##########################################################\e[$default"
+  echo -e "\e[$blue#\e[$default" "\e[$orange Local Linux Enumeration & Privilege Escalation Script\e[$default" "\e[$blue#\e[$default"
+  echo -e "\e[$blue##########################################################\e[$default"
   echo -e "\e[$orange# www.rebootuser.com | @rebootuser \e[$default"
   echo -e "\e[$orange# $VERSION\e[$default\n"
   echo -e "\e[$orange# Example: ./LinEnum.sh -k keyword -r report -e /tmp/ -t \e[$default\n"
 
   echo "OPTIONS:"
   echo "-e    Enter export location"
-  echo "-d    Print debug info" 
+  echo "-d    Print debug info"
   echo "-h    Displays this help text"
   echo "-k    Enter keyword"
   echo "-r    Enter report name"
@@ -31,13 +31,13 @@ usage() {
   echo -e "\n"
   echo "Running with no options = limited scans/no output file"
 
-  echo -e "\e[$red#########################################################\e[$default"
+  echo -e "\e[$blue#########################################################\e[$default"
 }
 
 header() {
-  echo -e "\n\e[$red##########################################################\e[$default"
-  echo -e "\e[$red#\e[$default" "\e[$orange Local Linux Enumeration & Privilege Escalation Script\e[$default" "\e[$red#\e[$default"
-  echo -e "\e[$red##########################################################\e[$default"
+  echo -e "\n\e[$blue##########################################################\e[$default"
+  echo -e "\e[$blue#\e[$default" "\e[$orange Local Linux Enumeration & Privilege Escalation Script\e[$default" "\e[$blue#\e[$default"
+  echo -e "\e[$blue##########################################################\e[$default"
   echo -e "\e[$orange# www.rebootuser.com\e[$default"
   echo -e "\e[$orange# $VERSION\e[$default\n"
 
@@ -48,16 +48,16 @@ debug_info() {
 
   if [ "$export" ]; then
     echo -e "    [+] Export path              = \e[$green $export\e[$default"
-   else
+  else
     echo -e "    [+] Export                   = \e[$red disabled\e[$default"
   fi
 
   if [ "$keyword" ]; then
     echo -e "    [+] Keyword search           = \e[$green $keyword\e[$default"
-  else 
+  else
     echo -e "    [+] Keyword search           = \e[$red disabled\e[$default"
   fi
-  
+
   if [ "$report" ]; then
     echo -e "    [+] Reporting                = \e[$green $report\e[$default"
   else
@@ -79,9 +79,9 @@ debug_info() {
   sleep 2
 
   if [ "$export" ]; then
-    mkdir -p "$export" 2> /dev/null
+    mkdir -p "$export" 2>/dev/null
     if [ ! $? -eq 0 ]; then
-      echo -e "\n \e[$red Could not create directory '$export'\e[$default"
+      echo -e "\n \e[$blue Could not create directory '$export'\e[$default"
       exit 1
     fi
 
