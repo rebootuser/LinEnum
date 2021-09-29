@@ -112,7 +112,7 @@ user_info() {
     if [ "$sudoperms" ]; then
       :
     else
-      sudoauth=$(echo $userpassword | sudo -S -l -k 2>/dev/null)
+      sudoauth=$(echo $user_password | sudo -S -l -k 2>/dev/null)
       if [ "$sudoauth" ]; then
         echo -e "\e[00;33m[+] We can sudo when supplying a password!\e[00m\n$sudoauth"
         echo -e "\n"
@@ -125,7 +125,7 @@ user_info() {
     if [ "$sudoperms" ]; then
       :
     else
-      sudopermscheck=$(echo $userpassword | sudo -S -l -k 2>/dev/null | xargs -n 1 2>/dev/null | sed 's/,*$//g' 2>/dev/null | grep -w $binarylist 2>/dev/null)
+      sudopermscheck=$(echo $user_password | sudo -S -l -k 2>/dev/null | xargs -n 1 2>/dev/null | sed 's/,*$//g' 2>/dev/null | grep -w $binarylist 2>/dev/null)
       if [ "$sudopermscheck" ]; then
         echo -e "\e[00;33m[-] Possible sudo pwnage!\e[00m\n$sudopermscheck"
         echo -e "\n"

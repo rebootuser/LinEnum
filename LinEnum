@@ -28,7 +28,7 @@
 #    MIT
 #
 
-version="version 0.982"
+VERSION="version 0.982"
 #@rebootuser
 
 # Set the path to include the libraries. These are searched for in the same directory or within the path. We capture

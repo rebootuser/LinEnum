@@ -1,13 +1,23 @@
 #!/bin/bash
 
-#help function
+red="0;31m"
+green="0;32m"
+orange="0;33m"
+blue="0;34m"
+purple="0;35m"
+cyan="0;36m"
+white="1;37m"
+yellow="1;33m"
+default="0m"
+
+# help function
 usage() {
-  echo -e "\n\e[00;31m#########################################################\e[00m"
-  echo -e "\e[00;31m#\e[00m" "\e[00;33mLocal Linux Enumeration & Privilege Escalation Script\e[00m" "\e[00;31m#\e[00m"
-  echo -e "\e[00;31m#########################################################\e[00m"
-  echo -e "\e[00;33m# www.rebootuser.com | @rebootuser \e[00m"
-  echo -e "\e[00;33m# $version\e[00m\n"
-  echo -e "\e[00;33m# Example: ./LinEnum.sh -k keyword -r report -e /tmp/ -t \e[00m\n"
+  echo -e "\n\e[$red#########################################################\e[$default"
+  echo -e "\e[$red#\e[00m" "\e[$orange Local Linux Enumeration & Privilege Escalation Script\e[$default" "\e[$red#\e[$default"
+  echo -e "\e[$red#########################################################\e[$default"
+  echo -e "\e[$orange# www.rebootuser.com | @rebootuser \e[$default"
+  echo -e "\e[$orange# $version\e[$default\n"
+  echo -e "\e[$orange# Example: ./LinEnum.sh -k keyword -r report -e /tmp/ -t \e[$default\n"
 
   echo "OPTIONS:"
   echo "-k	Enter keyword"
@@ -19,15 +29,15 @@ usage() {
   echo -e "\n"
   echo "Running with no options = limited scans/no output file"
 
-  echo -e "\e[00;31m#########################################################\e[00m"
+  echo -e "\e[$red#########################################################\e[$default"
 }
 
 header() {
-  echo -e "\n\e[00;31m#########################################################\e[00m"
-  echo -e "\e[00;31m#\e[00m" "\e[00;33mLocal Linux Enumeration & Privilege Escalation Script\e[00m" "\e[00;31m#\e[00m"
-  echo -e "\e[00;31m#########################################################\e[00m"
-  echo -e "\e[00;33m# www.rebootuser.com\e[00m"
-  echo -e "\e[00;33m# $version\e[00m\n"
+  echo -e "\n\e[$red#########################################################\e[$default"
+  echo -e "\e[$red#\e[00m" "\e[00;33mLocal Linux Enumeration & Privilege Escalation Script\e[$default" "\e[$red#\e[$default"
+  echo -e "\e[$red#########################################################\e[$default"
+  echo -e "\e[$orange# www.rebootuser.com\e[$default"
+  echo -e "\e[$orange# $version\e[$default\n"
 
 }
 
@@ -49,27 +59,29 @@ debug_info() {
   if [ "$thorough" ]; then
     echo "[+] Thorough tests = Enabled"
   else
-    echo -e "\e[00;33m[+] Thorough tests = Disabled\e[00m"
+    echo -e "\e[$purple [+] Thorough tests = Disabled\e[$default"
   fi
 
   sleep 2
 
   if [ "$export" ]; then
-    mkdir $export 2>/dev/null
-    format=$export/LinEnum-export-$(date +"%d-%m-%y")
-    mkdir $format 2>/dev/null
+    mkdir "$export" 2>/dev/null
+    local format
+    format="$export/LinEnum-export-$(date +"%d-%m-%y")"
+    mkdir "$format" 2>/dev/null
   fi
 
   if [ "$sudopass" ]; then
-    echo -e "\e[00;35m[+] Please enter password - INSECURE - really only for CTF use!\e[00m"
-    read -s userpassword
+    local user_password
+    echo -e "\e[$purple [+] Please enter password - INSECURE - really only for CTF use!\e[$default"
+    read -sr user_password
     echo
   fi
 
   who=$(whoami) 2>/dev/null
   echo -e "\n"
 
-  echo -e "\e[00;33mScan started at:"
+  echo -e "\e[$orange Scan started at:"
   date
   echo -e "\e[00m\n"
 }
