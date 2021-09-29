@@ -12,20 +12,22 @@ default="0m"
 
 # help function
 usage() {
-  echo -e "\n\e[$red#########################################################\e[$default"
-  echo -e "\e[$red#\e[00m" "\e[$orange Local Linux Enumeration & Privilege Escalation Script\e[$default" "\e[$red#\e[$default"
-  echo -e "\e[$red#########################################################\e[$default"
+  echo -e "\n\e[$red##########################################################\e[$default"
+  echo -e "\e[$red#\e[$default" "\e[$orange Local Linux Enumeration & Privilege Escalation Script\e[$default" "\e[$red#\e[$default"
+  echo -e "\e[$red##########################################################\e[$default"
   echo -e "\e[$orange# www.rebootuser.com | @rebootuser \e[$default"
-  echo -e "\e[$orange# $version\e[$default\n"
+  echo -e "\e[$orange# $VERSION\e[$default\n"
   echo -e "\e[$orange# Example: ./LinEnum.sh -k keyword -r report -e /tmp/ -t \e[$default\n"
 
   echo "OPTIONS:"
-  echo "-k	Enter keyword"
-  echo "-e	Enter export location"
-  echo "-s 	Supply user password for sudo checks (INSECURE)"
-  echo "-t	Include thorough (lengthy) tests"
-  echo "-r	Enter report name"
-  echo "-h	Displays this help text"
+  echo "-e    Enter export location"
+  echo "-d    Print debug info" 
+  echo "-h    Displays this help text"
+  echo "-k    Enter keyword"
+  echo "-r    Enter report name"
+  echo "-s    Supply user password for sudo checks (INSECURE)"
+  echo "-t    Include thorough (lengthy) tests"
+
   echo -e "\n"
   echo "Running with no options = limited scans/no output file"
 
@@ -33,39 +35,56 @@ usage() {
 }
 
 header() {
-  echo -e "\n\e[$red#########################################################\e[$default"
-  echo -e "\e[$red#\e[00m" "\e[00;33mLocal Linux Enumeration & Privilege Escalation Script\e[$default" "\e[$red#\e[$default"
-  echo -e "\e[$red#########################################################\e[$default"
+  echo -e "\n\e[$red##########################################################\e[$default"
+  echo -e "\e[$red#\e[$default" "\e[$orange Local Linux Enumeration & Privilege Escalation Script\e[$default" "\e[$red#\e[$default"
+  echo -e "\e[$red##########################################################\e[$default"
   echo -e "\e[$orange# www.rebootuser.com\e[$default"
-  echo -e "\e[$orange# $version\e[$default\n"
+  echo -e "\e[$orange# $VERSION\e[$default\n"
 
 }
 
 debug_info() {
   echo "[-] Debug Info"
 
-  if [ "$keyword" ]; then
-    echo "[+] Searching for the keyword $keyword in conf, php, ini and log files"
-  fi
-
-  if [ "$report" ]; then
-    echo "[+] Report name = $report"
-  fi
-
   if [ "$export" ]; then
-    echo "[+] Export location = $export"
+    echo -e "    [+] Export path              = \e[$green $export\e[$default"
+   else
+    echo -e "    [+] Export                   = \e[$red disabled\e[$default"
+  fi
+
+  if [ "$keyword" ]; then
+    echo -e "    [+] Keyword search           = \e[$green $keyword\e[$default"
+  else 
+    echo -e "    [+] Keyword search           = \e[$red disabled\e[$default"
+  fi
+  
+  if [ "$report" ]; then
+    echo -e "    [+] Reporting                = \e[$green $report\e[$default"
+  else
+    echo -e "    [+] Reporting                = \e[$red disabled\e[$default"
+  fi
+
+  if [ "$sudopass" ]; then
+    echo -e "    [+] Sudo                     = \e[$green enabled\e[$default"
+  else
+    echo -e "    [+] Sudo                     = \e[$red disabled\e[$default"
   fi
 
   if [ "$thorough" ]; then
-    echo "[+] Thorough tests = Enabled"
+    echo -e "    [+] Thorough tests           = \e[$green enabled\e[$default"
   else
-    echo -e "\e[$purple [+] Thorough tests = Disabled\e[$default"
+    echo -e "    [+] Thorough tests           = \e[$red disabled\e[$default"
   fi
 
   sleep 2
 
   if [ "$export" ]; then
-    mkdir "$export" 2>/dev/null
+    mkdir -p "$export" 2> /dev/null
+    if [ ! $? -eq 0 ]; then
+      echo -e "\n \e[$red Could not create directory '$export'\e[$default"
+      exit 1
+    fi
+
     local format
     format="$export/LinEnum-export-$(date +"%d-%m-%y")"
     mkdir "$format" 2>/dev/null
@@ -78,17 +97,19 @@ debug_info() {
     echo
   fi
 
-  who=$(whoami) 2>/dev/null
-  echo -e "\n"
+  # who=$(whoami) 2>/dev/null
+  echo ""
 
-  echo -e "\e[$orange Scan started at:"
-  date
-  echo -e "\e[00m\n"
+  echo -e "\e[$orange [+] Scan started at:"
+  d_stamp=$(date)
+  echo " [+] $d_stamp"
+  echo -e "\e[$default\n"
 }
 
 # useful binaries (thanks to https://gtfobins.github.io/)
 binarylist='aria2c\|arp\|ash\|awk\|base64\|bash\|busybox\|cat\|chmod\|chown\|cp\|csh\|curl\|cut\|dash\|date\|dd\|diff\|dmsetup\|docker\|ed\|emacs\|env\|expand\|expect\|file\|find\|flock\|fmt\|fold\|ftp\|gawk\|gdb\|gimp\|git\|grep\|head\|ht\|iftop\|ionice\|ip$\|irb\|jjs\|jq\|jrunscript\|ksh\|ld.so\|ldconfig\|less\|logsave\|lua\|make\|man\|mawk\|more\|mv\|mysql\|nano\|nawk\|nc\|netcat\|nice\|nl\|nmap\|node\|od\|openssl\|perl\|pg\|php\|pic\|pico\|python\|readelf\|rlwrap\|rpm\|rpmquery\|rsync\|ruby\|run-parts\|rvim\|scp\|script\|sed\|setarch\|sftp\|sh\|shuf\|socat\|sort\|sqlite3\|ssh$\|start-stop-daemon\|stdbuf\|strace\|systemctl\|tail\|tar\|taskset\|tclsh\|tee\|telnet\|tftp\|time\|timeout\|ul\|unexpand\|uniq\|unshare\|vi\|vim\|watch\|wget\|wish\|xargs\|xxd\|zip\|zsh'
 
+# TODO make this prettier
 footer() {
-  echo -e "\e[00;33m### SCAN COMPLETE ####################################\e[00m"
+  echo -e "\e[$orange############### SCAN COMPLETE ###############\e[$default"
 }

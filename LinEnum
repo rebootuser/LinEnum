@@ -61,8 +61,11 @@ library_import
 
 call_each() {
   header
-  #  debug_info
-  #  system_info
+
+  if [ "$debug" ]; then
+    debug_info
+  fi
+  #  system_info  ## 1st pass complete
   #  user_info
   #  environmental_info
   #  job_info
@@ -75,9 +78,10 @@ call_each() {
   footer
 }
 
-while getopts "h:k:r:e:st" option; do
+while getopts "h:k:r:e:std" option; do
   case "${option}" in
   k) keyword=${OPTARG} ;;
+  d) debug=1 ;;
   r) report=${OPTARG}"-"$(date +"%d-%m-%y") ;;
   e) export=${OPTARG} ;;
   s) sudopass=1 ;;
