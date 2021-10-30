@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# TODO: Create more descriptive file names
+# TODO: Create more descriptive function names
 
 # Current User Details
 current_user() {
@@ -78,7 +78,7 @@ read_passwd_contents() {
     printf "%s[-] Contents of /etc/passwd:%s\n" "${cyan}" "${default}"
     printf "%s\n" "${passwd_contents[@]}"
 
-    # TODO pass in the data, instead of recalling the function
+    # BUG pass in the data, instead of recalling the function
     export_passwd_contents
   else
     printf "%s[-] Could not read /etc/passwd%s" "${purple}" "${default}"
@@ -88,8 +88,7 @@ read_passwd_contents() {
 }
 
 # TODO: Change $format to $location
-# TODO: Chnage varianle name from export as that is a std command
-
+# TODO: Change variable name from export as that is a std command
 # If selected, export the contents of /etc/passwd
 export_passwd_contents() {
   local contents
@@ -119,7 +118,7 @@ read_shadow_file_contents() {
     printf "%s[-] Contents of /etc/shadow:%s\n" "${cyan}" "${default}"
     printf "%s\n" "${shadow_file_contents[@]}"
 
-    # TODO pass in the data, instead of recalling the function
+    # BUG pass in the data, instead of recalling the function
     export_shadow_file
   else
     printf "%s[-] Could not read /etc/shadow%s" "${purple}" "${default}"
@@ -130,7 +129,6 @@ read_shadow_file_contents() {
 
 # TODO: Change $format to $location
 # TODO: Chnage variable name from export as that is a std command
-
 # If selected, export the contents of /etc/shadow
 export_shadow_file() {
   local contents
@@ -161,7 +159,7 @@ read_bsd_shadow_file() {
       printf "%s[-] Contents of /etc/shadow:%s\n" "${cyan}" "${default}"
       printf "%s\n\n" "${shadow_file_contents[@]}"
 
-      # TODO pass in the data, instead of recalling the function
+      # BUG pass in the data, instead of recalling the function
       export_bsd_shadow_file
     else
       printf "%s[-] Could not read /etc/master.passwd%s\n\n" "${purple}" "${default}"
@@ -175,7 +173,6 @@ read_bsd_shadow_file() {
 
 # TODO: Change $format to $location
 # TODO: Chnage variable name from export as that is a std command
-
 # If selected, export the contents of /etc/shadow
 export_bsd_shadow_file() {
   local contents
@@ -203,6 +200,8 @@ find_uid0_accounts() {
   else
     printf "%s[-] Could not read /etc/passwd%s\n\n" "${purple}" "${default}"
   fi
+
+  return 0
 }
 
 #pull out vital sudoers info
@@ -213,17 +212,18 @@ print_sudoers_config() {
     printf "%s[-] Sudoers configuration (condensed):%s\n\n" "${cyan}" "${default}"
     printf "%s\n" "${sudoers_config}"
 
-    # TODO pass in the data, instead of recalling the function
+    # BUG pass in the data, instead of recalling the function
     export_sudoers_config
 
   else
     printf "%s[-] Could not read /etc/sudoers%s\n\n" "${purple}" "${default}"
   fi
+
+  return 0
 }
 
 # TODO: Change $format to $location
 # TODO: Chnage variable name from export as that is a std command
-
 # If selected, export the contents of /etc/shadow
 export_sudoers_config() {
   local contents
