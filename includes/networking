@@ -1,0 +1,84 @@
+#!/bin/bash
+
+networking_info() {
+  echo -e "\e[$orange### NETWORKING  ##########################################\e[$default"
+
+  #nic information
+  nicinfo=$(/sbin/ifconfig -a 2>/dev/null)
+  if [ "$nicinfo" ]; then
+    echo -e "\e[$red[-] Network and IP info:\e[$default\n$nicinfo"
+    echo -e "\n"
+  fi
+
+  #nic information (using ip)
+  nicinfoip=$(/sbin/ip a 2>/dev/null)
+  if [ ! "$nicinfo" ] && [ "$nicinfoip" ]; then
+    echo -e "\e[$red[-] Network and IP info:\e[$default\n$nicinfoip"
+    echo -e "\n"
+  fi
+
+  arpinfo=$(arp -a 2>/dev/null)
+  if [ "$arpinfo" ]; then
+    echo -e "\e[$red[-] ARP history:\e[$default\n$arpinfo"
+    echo -e "\n"
+  fi
+
+  arpinfoip=$(ip n 2>/dev/null)
+  if [ ! "$arpinfo" ] && [ "$arpinfoip" ]; then
+    echo -e "\e[$red[-] ARP history:\e[$default\n$arpinfoip"
+    echo -e "\n"
+  fi
+
+  #dns settings
+  nsinfo=$(grep "nameserver" /etc/resolv.conf 2>/dev/null)
+  if [ "$nsinfo" ]; then
+    echo -e "\e[$red[-] Nameserver(s):\e[$default\n$nsinfo"
+    echo -e "\n"
+  fi
+
+  nsinfosysd=$(systemd-resolve --status 2>/dev/null)
+  if [ "$nsinfosysd" ]; then
+    echo -e "\e[$red[-] Nameserver(s):\e[$default\n$nsinfosysd"
+    echo -e "\n"
+  fi
+
+  #default route configuration
+  defroute=$(route 2>/dev/null | grep default)
+  if [ "$defroute" ]; then
+    echo -e "\e[$red[-] Default route:\e[$default\n$defroute"
+    echo -e "\n"
+  fi
+
+  #default route configuration
+  defrouteip=$(ip r 2>/dev/null | grep default)
+  if [ ! "$defroute" ] && [ "$defrouteip" ]; then
+    echo -e "\e[$red[-] Default route:\e[$default\n$defrouteip"
+    echo -e "\n"
+  fi
+
+  #listening TCP
+  tcpservs=$(netstat -ntpl 2>/dev/null)
+  if [ "$tcpservs" ]; then
+    echo -e "\e[$red[-] Listening TCP:\e[$default\n$tcpservs"
+    echo -e "\n"
+  fi
+
+  tcpservsip=$(ss -t -l -n 2>/dev/null)
+  if [ ! "$tcpservs" ] && [ "$tcpservsip" ]; then
+    echo -e "\e[$red[-] Listening TCP:\e[$default\n$tcpservsip"
+    echo -e "\n"
+  fi
+
+  #listening UDP
+  udpservs=$(netstat -nupl 2>/dev/null)
+  if [ "$udpservs" ]; then
+    echo -e "\e[$red[-] Listening UDP:\e[$default\n$udpservs"
+    echo -e "\n"
+  fi
+
+  udpservsip=$(ss -u -l -n 2>/dev/null)
+  if [ ! "$udpservs" ] && [ "$udpservsip" ]; then
+    echo -e "\e[$red[-] Listening UDP:\e[$default\n$udpservsip"
+    echo -e "\n"
+  fi
+}
