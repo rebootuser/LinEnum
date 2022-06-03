@@ -116,7 +116,12 @@ fi
 user_info()
 {
 echo -e "\e[00;33m### USER/GROUP ##########################################\e[00m" 
-
+#Can the current user execute anything with elevated privilege
+privilege=`sudo -l`
+if [ "$privilege" ]; then
+  echo -e "\e[00;31m[-] Sudo Privilege Escalation:\e[00m\n$privilege" 
+  echo -e "\n" 
+fi
 #current user details
 currusr=`id 2>/dev/null`
 if [ "$currusr" ]; then
