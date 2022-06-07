@@ -116,7 +116,12 @@ fi
 user_info()
 {
 echo -e "\e[00;33m### USER/GROUP ##########################################\e[00m" 
-
+#Can the current user execute anything with elevated privilege
+privilege=`sudo -l`
+if [ "$privilege" ]; then
+  echo -e "\e[00;31m[-] Sudo Privilege Escalation:\e[00m\n$privilege" 
+  echo -e "\n" 
+fi
 #current user details
 currusr=`id 2>/dev/null`
 if [ "$currusr" ]; then
@@ -562,6 +567,22 @@ fi
 udpservsip=`ss -u -l -n 2>/dev/null`
 if [ ! "$udpservs" ] && [ "$udpservsip" ]; then
   echo -e "\e[00;31m[-] Listening UDP:\e[00m\n$udpservsip" 
+  echo -e "\n"
+fi
+#Firewall config check
+iptables=`/sbin/iptables -L 2>/dev/null`
+iptables_nat=`/sbin/iptables -L -t nat 2>/dev/null`
+iptables_man=`/sbin/iptables -L -t mangle 2>/dev/null`
+if [ "$iptables" ]; then
+  echo -e "\e[00;31m[-] Firewall Config:\e[00m\n$iptables" 
+  echo -e "\n"
+fi
+if [ "$iptables_nat" ]; then
+  echo -e "\e[00;31m[-] Firewall Config(NAT):\e[00m\n$iptables_nat" 
+  echo -e "\n"
+fi
+if [ "$iptables_man" ]; then
+  echo -e "\e[00;31m[-] Firewall Config(mangle):\e[00m\n$iptables_man" 
   echo -e "\n"
 fi
 }
