@@ -569,6 +569,22 @@ if [ ! "$udpservs" ] && [ "$udpservsip" ]; then
   echo -e "\e[00;31m[-] Listening UDP:\e[00m\n$udpservsip" 
   echo -e "\n"
 fi
+#Firewall config check
+iptables=`/sbin/iptables -L 2>/dev/null`
+iptables_nat=`/sbin/iptables -L -t nat 2>/dev/null`
+iptables_man=`/sbin/iptables -L -t mangle 2>/dev/null`
+if [ "$iptables" ]; then
+  echo -e "\e[00;31m[-] Firewall Config:\e[00m\n$iptables" 
+  echo -e "\n"
+fi
+if [ "$iptables_nat" ]; then
+  echo -e "\e[00;31m[-] Firewall Config(NAT):\e[00m\n$iptables_nat" 
+  echo -e "\n"
+fi
+if [ "$iptables_man" ]; then
+  echo -e "\e[00;31m[-] Firewall Config(mangle):\e[00m\n$iptables_man" 
+  echo -e "\n"
+fi
 }
 
 services_info()
